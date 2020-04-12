@@ -2,6 +2,29 @@
 
 #include <iostream>
 
+__global__
+void testKernel() {
+    testFWBMetadata(17, 1, 131071);
+    testFWBMetadata(64, 2, 0);
+    testFWBMetadata(192, 4, 0);
+    testFWBMetadata(201, 4, 511);
+    testFWBMetadata(64000, 1001, 0);
+
+    for (size_t p = 64; p <= 256; p += 3) {
+        testFWIIncrement(p);
+        testFWIDecrement(p);
+        testFWIInvert(p);
+        testFWIAnd(p);
+        testFWIOr(p);
+        for (size_t z = 0; z <= p; z++) {
+            testFWITrailingZeroes(p, z);
+        }
+        for (size_t s = 0; s <= p * 2; s++) {
+            testFWIRightShift(p, s);
+        }
+    }
+}
+
 int main() {
     int devices = 0;
     cudaGetDeviceCount(&devices);
@@ -10,25 +33,7 @@ int main() {
         return EXIT_FAILURE;
     }
 
-    testFWBuffer<<<1, 1>>>(17, 1, 131071);
-    testFWBuffer<<<1, 1>>>(64, 2, 0);
-    testFWBuffer<<<1, 1>>>(192, 4, 0);
-    testFWBuffer<<<1, 1>>>(201, 4, 511);
-    testFWBuffer<<<1, 1>>>(64000, 1001, 0);
-
-    for (size_t p = 2; p <= 256; p++) {
-        testFWIIncrement<<<1, 1>>>(p);
-        testFWIDecrement<<<1, 1>>>(p);
-        testFWIInvert<<<1, 1>>>(p);
-        testFWIAnd<<<1, 1>>>(p);
-        testFWIOr<<<1, 1>>>(p);
-        for (size_t z = 0; z <= p; z++) {
-            testFWITrailingZeroes<<<1, 1>>>(p, z);
-        }
-        for (size_t s = 0; s <= p * 2; s++) {
-            testFWIRightShift<<<1, 1>>>(p, s);
-        }
-    }
+    testKernel<<<1, 1>>>(); 
 
     cudaDeviceSynchronize();
     std::cout << "Tests finished." << std::endl;

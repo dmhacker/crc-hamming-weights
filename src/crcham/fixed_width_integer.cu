@@ -1,5 +1,7 @@
 #include <crcham/fixed_width_integer.hpp>
 
+#include <stdio.h>
+
 namespace crcham {
 
 namespace {
@@ -55,7 +57,7 @@ size_t FixedWidthInteger::trailingZeroes()
     for (size_t i = 0; i < d_buffer.size() - 1; i++) {
         size_t j = d_buffer.size() - 1 - i;
         if (ptr[j] != 0) {
-            return (i - 1) * 64 + ctz64(ptr[j]);
+            return i * 64 + ctz64(ptr[j]);
         }
     }
     return (d_buffer.size() - 1) * 64 + umin(ctz64(ptr[0]), d_buffer.precision() % 64);
@@ -70,7 +72,6 @@ void FixedWidthInteger::operator|=(const FixedWidthInteger& other)
         ptr[i] |= optr[i];
     }
     ptr[0] &= d_buffer.leadingBitMask();
-
 }
 
 __device__ 
@@ -82,7 +83,6 @@ void FixedWidthInteger::operator&=(const FixedWidthInteger& other)
         ptr[i] &= optr[i];
     }
     ptr[0] &= d_buffer.leadingBitMask();
-
 }
 
 __device__ 

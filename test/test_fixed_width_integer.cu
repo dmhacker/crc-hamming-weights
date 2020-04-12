@@ -4,7 +4,7 @@
 
 using namespace crcham;
 
-__global__
+__device__
 void testFWIIncrement(size_t prec) {
     FixedWidthBuffer buffer(prec);
     FixedWidthInteger fwint(buffer); 
@@ -27,7 +27,7 @@ void testFWIIncrement(size_t prec) {
     }
 }
 
-__global__
+__device__
 void testFWIDecrement(size_t prec) {
     FixedWidthBuffer buffer(prec);
     FixedWidthInteger fwint(buffer); 
@@ -63,7 +63,7 @@ void testFWIDecrement(size_t prec) {
     }
 }
 
-__global__
+__device__
 void testFWIInvert(size_t prec) {
     FixedWidthBuffer buffer(prec);
     FixedWidthInteger fwint(buffer); 
@@ -92,29 +92,65 @@ void testFWIInvert(size_t prec) {
     assert(buffer.get()[0] == (buffer.leadingBitMask() & 0xAAAAAAAAAAAAAAAA));
 }
 
-__global__
+__device__
 void testFWIAnd(size_t prec) {
-    // TODO: Implement this function
+    FixedWidthBuffer buf1(prec);
+    FixedWidthInteger fwint1(buf1); 
+    FixedWidthBuffer buf2(prec);
+    FixedWidthInteger fwint2(buf2); 
+    assert(buf1.size() == buf2.size());
+    assert(buf1.leadingBitMask() == buf2.leadingBitMask());
+    assert(buf1.get() != buf2.get());
+    for (size_t i = 1; i < buf1.size(); i++) {
+        buf1.get()[i] = 0x3333333333333333;
+        buf2.get()[i] = 0x5555555555555555;
+    }
+    buf1.get()[0] = buf1.leadingBitMask() & 0x3333333333333333;
+    buf2.get()[0] = buf2.leadingBitMask() & 0x5555555555555555;
+    fwint1 &= fwint2;
+    for (size_t i = 1; i < buf1.size(); i++) {
+        assert(buf1.get()[i] == 0x1111111111111111);
+    }
+    assert(buf1.get()[0] == (buf1.leadingBitMask() & 0x1111111111111111));
 }
 
-__global__
+__device__
 void testFWIOr(size_t prec) {
-    // TODO: Implement this function
+    FixedWidthBuffer buf1(prec);
+    FixedWidthInteger fwint1(buf1); 
+    FixedWidthBuffer buf2(prec);
+    FixedWidthInteger fwint2(buf2); 
+    assert(buf1.size() == buf2.size());
+    assert(buf1.leadingBitMask() == buf2.leadingBitMask());
+    assert(buf1.get() != buf2.get());
+    for (size_t i = 1; i < buf1.size(); i++) {
+        buf1.get()[i] = 0x3333333333333333;
+        buf2.get()[i] = 0x5555555555555555;
+    }
+    buf1.get()[0] = buf1.leadingBitMask() & 0x3333333333333333;
+    buf2.get()[0] = buf2.leadingBitMask() & 0x5555555555555555;
+    fwint1 |= fwint2;
+    for (size_t i = 1; i < buf1.size(); i++) {
+        assert(buf1.get()[i] == 0x7777777777777777);
+    }
+    assert(buf1.get()[0] == (buf1.leadingBitMask() & 0x7777777777777777));
 }
 
-__global__
+__device__
 void testFWITrailingZeroes(size_t prec, size_t zeroes) {
     FixedWidthBuffer buffer(prec);
     FixedWidthInteger fwint(buffer); 
-    if (prec != zeroes) {
+    if (zeroes != prec) {
         size_t skips = zeroes / 64;
         size_t shifts = zeroes % 64; 
-        buffer.get()[buffer.size() - 1 - skips] = 1 << shifts;
+        uint64_t shifted = 1;
+        shifted <<= shifts;
+        buffer.get()[buffer.size() - 1 - skips] = shifted;
     }
     assert(fwint.trailingZeroes() == zeroes);
 }
 
-__global__
+__device__
 void testFWIRightShift(size_t prec, size_t shifts) {
     // TODO: Implement this function
 }

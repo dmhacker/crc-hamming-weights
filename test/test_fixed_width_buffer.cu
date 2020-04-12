@@ -4,8 +4,8 @@
 
 using namespace crcham;
 
-__global__
-void testFWBuffer(size_t prec, size_t sz, uint64_t mask) {
+__device__
+void testFWBMetadata(size_t prec, size_t sz, uint64_t mask) {
     FixedWidthBuffer buffer(prec);
     assert(buffer.precision() == prec);
     assert(buffer.size() == sz);
