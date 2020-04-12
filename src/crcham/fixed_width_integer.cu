@@ -88,7 +88,20 @@ void FixedWidthInteger::operator&=(const FixedWidthInteger& other)
 __device__ 
 void FixedWidthInteger::operator>>=(size_t shifts)
 {
-    
+    shifts = umin(shifts, d_buffer.precision());
+    size_t element_shifts = shifts / 64; 
+    size_t bit_shifts = shifts % 64;
+    auto ptr = d_buffer.get();
+    for (size_t i = 0; i < d_buffer.size() - element_shifts; i++) {
+        size_t to = d_buffer.size() - i - 1;
+        size_t from = to - element_shifts;
+        uint64_t previous = from == 0 ? 0 : ptr[from - 1];
+        ptr[to] = (ptr[from] >> bit_shifts) | (previous << (64 - bit_shifts));
+    }
+    for (size_t i = 0; i < element_shifts; i++) {
+        ptr[i] = 0;
+    }
+    ptr[0] &= d_buffer.leadingBitMask();
 }
 
 __device__ 

@@ -152,5 +152,34 @@ void testFWITrailingZeroes(size_t prec, size_t zeroes) {
 
 __device__
 void testFWIRightShift(size_t prec, size_t shifts) {
-    // TODO: Implement this function
+    FixedWidthBuffer buffer(prec);
+    FixedWidthInteger fwint(buffer); 
+    uint64_t maximum = 0;
+    maximum--;
+    for (size_t i = 1; i < buffer.size(); i++) {
+        buffer.get()[i] = maximum;
+    }
+    buffer.get()[0] = buffer.leadingBitMask();
+    fwint >>= shifts;
+    size_t ones = 0;
+    bool all_ones = true;
+    for (size_t i = 0; i < buffer.size(); i++) {
+        size_t j = buffer.size() - 1 - i;
+        uint64_t element = buffer.get()[j];
+        ones += __popcll(element);
+        if (all_ones) {
+            if (element != maximum) {
+                all_ones = false;
+            }
+        }
+        else {
+            assert(element == 0);
+        }
+    }
+    if (shifts <= prec) {
+        assert(prec == ones + shifts);
+    }
+    else {
+        assert(ones == 0);
+    }
 }
