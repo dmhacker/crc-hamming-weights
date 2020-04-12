@@ -52,7 +52,7 @@ __device__
 size_t FixedWidthInteger::trailingZeroes()
 {
     auto ptr = d_buffer.get();
-    for (size_t i = 1; i < d_buffer.size(); i++) {
+    for (size_t i = 0; i < d_buffer.size() - 1; i++) {
         size_t j = d_buffer.size() - 1 - i;
         if (ptr[j] != 0) {
             return (i - 1) * 64 + ctz64(ptr[j]);
@@ -95,14 +95,14 @@ __device__
 void FixedWidthInteger::increment()
 {
     auto ptr = d_buffer.get();
-    for (size_t i = 1; i < d_buffer.size(); i++) {
+    for (size_t i = 0; i < d_buffer.size() - 1; i++) {
         size_t j = d_buffer.size() - 1 - i;
         if (ptr[j] + 1 == 0) {
             ptr[j] = 0;
-            return;
         }
         else {
             ptr[j]++;
+            return;
         }
     }
     if (ptr[0] == d_buffer.leadingBitMask()) {
@@ -117,7 +117,7 @@ __device__
 void FixedWidthInteger::decrement()
 {
     auto ptr = d_buffer.get();
-    for (size_t i = 1; i < d_buffer.size(); i++) {
+    for (size_t i = 0; i < d_buffer.size() - 1; i++) {
         size_t j = d_buffer.size() - 1 - i;
         if (ptr[j] == 0) {
             ptr[j]--;
