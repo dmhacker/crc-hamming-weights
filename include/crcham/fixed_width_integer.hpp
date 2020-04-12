@@ -12,16 +12,29 @@ public:
     __device__
     FixedWidthInteger(FixedWidthBuffer&);
     __device__
-        FixedWidthInteger&
+    FixedWidthInteger&
         operator=(const FixedWidthInteger&);
-    __device__ size_t trailingZeroes();
-    __device__ void operator|=(const FixedWidthInteger&);
-    __device__ void operator&=(const FixedWidthInteger&);
-    __device__ void operator>>=(size_t);
-    __device__ void increment();
-    __device__ void decrement();
-    __device__ void invert();
-    __device__ void negate();
+
+    __device__ 
+    size_t trailingZeroes();
+    __device__ 
+    void operator|=(const FixedWidthInteger&);
+    __device__ 
+    void operator&=(const FixedWidthInteger&);
+    __device__ 
+    void operator>>=(size_t);
+    __device__ 
+    void increment();
+    __device__ 
+    void decrement();
+    __device__ 
+    void invert();
+    __device__ 
+    void negate();
+
+    __device__ 
+    static void nextPermutation(FixedWidthInteger&, 
+        FixedWidthInteger&, FixedWidthInteger&);
 };
 
 }
