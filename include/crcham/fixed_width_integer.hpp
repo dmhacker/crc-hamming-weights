@@ -34,9 +34,9 @@ public:
     __device__ 
     void negate();
     __device__ 
-    void permuteNext(FixedWidthInteger&, FixedWidthInteger&);
+    void permuteNext(FixedWidthInteger& tmp1, FixedWidthInteger& tmp2);
     __device__ 
-    void permuteNth(size_t n, size_t k);
+    void permuteNth(uint64_t n, size_t k);
 };
 
 }

@@ -34,18 +34,20 @@ namespace {
     }
 
     __device__
-    size_t choose(size_t n, size_t k) {
+    uint64_t choose(uint64_t n, uint64_t k) {
         // https://stackoverflow.com/questions/3025162/statistics-combinations-in-python 
-        // Assume that k <= n
-        size_t ntok = 1;
-        size_t ktok = 1;
-        size_t tmax = umin(k, n - k);
-        for (size_t t = 1; t <= tmax; t++) {
-            ntok *= n;
-            ktok *= t;
-            n -= 1;
+        if (k <= n) {
+            uint64_t ntok = 1;
+            uint64_t ktok = 1;
+            uint64_t tmax = umin(k, n - k);
+            for (uint64_t t = 1; t <= tmax; t++) {
+                ntok *= n;
+                ktok *= t;
+                n -= 1;
+            }
+            return ntok;
         }
-        return ntok;
+        return 0;
     }
 }
 
@@ -191,25 +193,6 @@ void FixedWidthInteger::negate()
 }
 
 __device__ 
-void FixedWidthInteger::permuteNth(size_t n, size_t k) {
-    // TODO: Fill buffer
-    // TODO: Use uint64_t instead of size_t?
-    size_t m = d_buffer.precision();
-    size_t mx = choose(m - 1, k); 
-    for (size_t i = 0; i < m; i++) {
-        if (n < mx) {
-            // ith bit is a 0
-        }
-        else {
-            // ith bit is a 1
-            n -= mx;
-            k--;
-            mx = choose(m - 1, k);
-        }
-    }
-}
-
-__device__ 
 void FixedWidthInteger::permuteNext(FixedWidthInteger& tmp1, 
     FixedWidthInteger& tmp2) 
 {
@@ -229,5 +212,23 @@ void FixedWidthInteger::permuteNext(FixedWidthInteger& tmp1,
     perm |= tmp1;
 }
 
+__device__ 
+void FixedWidthInteger::permuteNth(uint64_t n, size_t k) {
+    // TODO: Fill buffer
+    size_t mmax = d_buffer.precision();
+    for (size_t i = 0; i < mmax; i++) {
+        size_t m = mmax - i;
+        uint64_t m1ck = choose(m - 1, k); 
+        if (n < m1ck) {
+            // ith bit is a 0
+        }
+        else {
+            // ith bit is a 1
+            n -= m1ck;
+            k--;
+        }
+    }
+
+}
 
 }
