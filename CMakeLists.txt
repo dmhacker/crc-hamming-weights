@@ -10,7 +10,7 @@ file(GLOB_RECURSE sources
     "${CMAKE_SOURCE_DIR}/src/*.cpp"
     "${CMAKE_SOURCE_DIR}/src/*.cu"
 )
-set(main_source "${CMAKE_SOURCE_DIR}/src/main.cpp")
+set(main_source "${CMAKE_SOURCE_DIR}/src/main.cu")
 list(REMOVE_ITEM sources ${main_source})
 file(GLOB_RECURSE test_sources
     "${CMAKE_SOURCE_DIR}/test/*.cpp"
