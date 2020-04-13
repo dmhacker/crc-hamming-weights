@@ -183,3 +183,29 @@ void testFWIRightShift(size_t prec, size_t shifts) {
         assert(ones == 0);
     }
 }
+
+__device__
+void testFWIPermute(size_t prec, size_t weight) {
+    FixedWidthBuffer pbuf(prec);
+    FixedWidthBuffer buf1(prec);
+    FixedWidthBuffer buf2(prec);
+    FixedWidthInteger perm(pbuf);
+    FixedWidthInteger tmp1(buf1);
+    FixedWidthInteger tmp2(buf2);
+    uint64_t maximum = 0;
+    maximum--;
+    uint64_t maxes = weight / 64;
+    for (size_t i = 0; i < maxes; i++) {
+        pbuf.get()[pbuf.size() - 1 - i] = maximum;
+    }
+    if (weight % 64 != 0) {
+        maximum = 1ULL << (weight % 64);
+        maximum--;
+        pbuf.get()[pbuf.size() - 1 - maxes] = maximum;
+    }
+    assert(perm.hammingWeight() == weight);
+    for (size_t i = 0; i < 8; i++) {
+        FixedWidthInteger::permute(perm, tmp1, tmp2);
+        assert(perm.hammingWeight() == weight);
+    }
+}

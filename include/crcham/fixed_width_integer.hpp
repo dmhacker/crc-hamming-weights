@@ -18,6 +18,8 @@ public:
     __device__ 
     size_t trailingZeroes();
     __device__ 
+    size_t hammingWeight();
+    __device__ 
     void operator|=(const FixedWidthInteger&);
     __device__ 
     void operator&=(const FixedWidthInteger&);
@@ -33,7 +35,7 @@ public:
     void negate();
 
     __device__ 
-    static void nextPermutation(FixedWidthInteger&, 
+    static void permute(FixedWidthInteger&, 
         FixedWidthInteger&, FixedWidthInteger&);
 };
 

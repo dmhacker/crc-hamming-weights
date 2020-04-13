@@ -64,6 +64,16 @@ size_t FixedWidthInteger::trailingZeroes()
 }
 
 __device__ 
+size_t FixedWidthInteger::hammingWeight() {
+    auto ptr = d_buffer.get();
+    size_t ones = 0;
+    for (size_t i = 0; i < d_buffer.size(); i++) {
+        ones += __popcll(ptr[i]);
+    }
+    return ones;
+}
+
+__device__ 
 void FixedWidthInteger::operator|=(const FixedWidthInteger& other)
 {
     auto ptr = d_buffer.get();
@@ -162,11 +172,11 @@ __device__
 void FixedWidthInteger::negate()
 {
     invert();
-    decrement();
+    increment();
 }
 
 __device__ 
-void FixedWidthInteger::nextPermutation(FixedWidthInteger& perm, 
+void FixedWidthInteger::permute(FixedWidthInteger& perm, 
     FixedWidthInteger& tmp1, FixedWidthInteger& tmp2) 
 {
     size_t ptz = perm.trailingZeroes() + 1;

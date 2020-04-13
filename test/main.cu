@@ -22,6 +22,9 @@ void testKernel() {
         for (size_t s = 0; s <= p * 2; s++) {
             testFWIRightShift(p, s);
         }
+        for (size_t w = 1; w < p; w++) {
+            testFWIPermute(p, w);
+        }
     }
 }
 
