@@ -185,27 +185,33 @@ void testFWIRightShift(size_t prec, size_t shifts) {
 }
 
 __device__
-void testFWIPermuteNext(size_t prec, size_t weight) {
-    FixedWidthBuffer pbuf(prec);
+void testFWIPermute(size_t prec, size_t weight) {
     FixedWidthBuffer buf1(prec);
     FixedWidthBuffer buf2(prec);
-    FixedWidthInteger perm(pbuf);
-    FixedWidthInteger tmp1(buf1);
-    FixedWidthInteger tmp2(buf2);
+    FixedWidthBuffer tbuf1(prec);
+    FixedWidthBuffer tbuf2(prec);
+    FixedWidthInteger perm1(buf1);
+    FixedWidthInteger perm2(buf2);
+    FixedWidthInteger tmp1(tbuf1);
+    FixedWidthInteger tmp2(tbuf2);
     uint64_t maximum = 0;
     maximum--;
     uint64_t maxes = weight / 64;
     for (size_t i = 0; i < maxes; i++) {
-        pbuf.get()[pbuf.size() - 1 - i] = maximum;
+        buf1.get()[buf1.size() - 1 - i] = maximum;
     }
     if (weight % 64 != 0) {
         maximum = 1ULL << (weight % 64);
         maximum--;
-        pbuf.get()[pbuf.size() - 1 - maxes] = maximum;
+        buf1.get()[buf1.size() - 1 - maxes] = maximum;
     }
-    assert(perm.hammingWeight() == weight);
+    assert(perm1.hammingWeight() == weight);
+    perm2.permuteNth(0, weight);
+    assert(perm2.hammingWeight() == weight);
     for (size_t i = 0; i < 8; i++) {
-        perm.permuteNext(tmp1, tmp2);
-        assert(perm.hammingWeight() == weight);
+        perm1.permuteNext(tmp1, tmp2);
+        assert(perm1.hammingWeight() == weight);
+        perm2.permuteNth(i + 1, weight);
+        assert(perm2.hammingWeight() == weight);
     }
 }

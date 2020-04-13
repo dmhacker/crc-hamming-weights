@@ -14,3 +14,13 @@ void testFWBMetadata(size_t prec, size_t sz, uint64_t mask) {
         assert(buffer.get()[i] == 0);
     }
 }
+
+__device__
+void testFWBEquality(size_t prec) {
+    // TODO
+}
+
+__device__
+void testFWBInequality(size_t prec) {
+    // TODO
+}

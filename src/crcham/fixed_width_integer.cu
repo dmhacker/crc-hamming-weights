@@ -34,20 +34,24 @@ namespace {
     }
 
     __device__
-    uint64_t choose(uint64_t n, uint64_t k) {
-        // https://stackoverflow.com/questions/3025162/statistics-combinations-in-python 
-        if (k <= n) {
-            uint64_t ntok = 1;
-            uint64_t ktok = 1;
-            uint64_t tmax = umin(k, n - k);
-            for (uint64_t t = 1; t <= tmax; t++) {
-                ntok *= n;
-                ktok *= t;
-                n -= 1;
-            }
-            return ntok;
+    uint64_t choose(uint64_t n, uint64_t k)
+    {
+        // See https://stackoverflow.com/questions/9330915/number-of-combinations-n-choose-r-in-c
+        if (k > n) {
+            return 0;
         }
-        return 0;
+        if (k * 2 > n) {
+            k = n - k;
+        }
+        if (k == 0) {
+            return 1;
+        }
+        uint64_t result = n;
+        for( uint64_t i = 2; i <= k; ++i ) {
+            result *= (n - i + 1);
+            result /= i;
+        }
+        return result;
     }
 }
 
@@ -214,16 +218,20 @@ void FixedWidthInteger::permuteNext(FixedWidthInteger& tmp1,
 
 __device__ 
 void FixedWidthInteger::permuteNth(uint64_t n, size_t k) {
-    // TODO: Fill buffer
     size_t mmax = d_buffer.precision();
     for (size_t i = 0; i < mmax; i++) {
         size_t m = mmax - i;
         uint64_t m1ck = choose(m - 1, k); 
-        if (n < m1ck) {
-            // ith bit is a 0
+        uint64_t* ptr;
+        if (i < mmax % 64) {
+            ptr = d_buffer.get(); 
         }
         else {
-            // ith bit is a 1
+            ptr = d_buffer.get() + (i - mmax % 64) / 64 + 1;
+        }
+        *ptr <<= 1;
+        if (n >= m1ck) {
+            *ptr |= 1;
             n -= m1ck;
             k--;
         }
