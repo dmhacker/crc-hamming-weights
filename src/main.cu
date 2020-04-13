@@ -26,12 +26,12 @@ void testKernel(size_t message_size, size_t weight) {
     FixedWidthInteger tmp1(buf1);
     FixedWidthInteger tmp2(buf2);
     for (size_t i = 0; i < index; i++) {
-        FixedWidthInteger::permute(permutation, tmp1, tmp2);
+        permutation.permuteNext(tmp1, tmp2);
     }
     for (size_t iter = 0; iter < 10; iter++) {
         // TODO: Perform CRC checks inside here
         for (size_t i = 0; i < blockDim.x * gridDim.x; i++) {
-            FixedWidthInteger::permute(permutation, tmp1, tmp2);
+            permutation.permuteNext(tmp1, tmp2);
         }
     }
 }

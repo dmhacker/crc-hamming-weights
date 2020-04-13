@@ -185,7 +185,7 @@ void testFWIRightShift(size_t prec, size_t shifts) {
 }
 
 __device__
-void testFWIPermute(size_t prec, size_t weight) {
+void testFWIPermuteNext(size_t prec, size_t weight) {
     FixedWidthBuffer pbuf(prec);
     FixedWidthBuffer buf1(prec);
     FixedWidthBuffer buf2(prec);
@@ -205,7 +205,7 @@ void testFWIPermute(size_t prec, size_t weight) {
     }
     assert(perm.hammingWeight() == weight);
     for (size_t i = 0; i < 8; i++) {
-        FixedWidthInteger::permute(perm, tmp1, tmp2);
+        perm.permuteNext(tmp1, tmp2);
         assert(perm.hammingWeight() == weight);
     }
 }

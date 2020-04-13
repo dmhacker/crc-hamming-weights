@@ -22,7 +22,7 @@ void testFWITrailingZeroes(size_t prec, size_t zeroes);
 __device__
 void testFWIRightShift(size_t prec, size_t shifts);
 __device__
-void testFWIPermute(size_t prec, size_t weight);
+void testFWIPermuteNext(size_t prec, size_t weight);
 
 
 #endif

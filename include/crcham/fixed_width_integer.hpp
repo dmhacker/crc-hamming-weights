@@ -33,10 +33,10 @@ public:
     void invert();
     __device__ 
     void negate();
-
     __device__ 
-    static void permute(FixedWidthInteger&, 
-        FixedWidthInteger&, FixedWidthInteger&);
+    void permuteNext(FixedWidthInteger&, FixedWidthInteger&);
+    __device__ 
+    void permuteNth(size_t n, size_t k);
 };
 
 }

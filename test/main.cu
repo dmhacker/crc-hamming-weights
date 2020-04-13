@@ -23,7 +23,7 @@ void testKernel() {
             testFWIRightShift(p, s);
         }
         for (size_t w = 1; w < p; w++) {
-            testFWIPermute(p, w);
+            testFWIPermuteNext(p, w);
         }
     }
 }

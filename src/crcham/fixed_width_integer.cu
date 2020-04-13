@@ -32,6 +32,21 @@ namespace {
         }
         return result - (x & 1);
     }
+
+    __device__
+    size_t choose(size_t n, size_t k) {
+        // https://stackoverflow.com/questions/3025162/statistics-combinations-in-python 
+        // Assume that k <= n
+        size_t ntok = 1;
+        size_t ktok = 1;
+        size_t tmax = umin(k, n - k);
+        for (size_t t = 1; t <= tmax; t++) {
+            ntok *= n;
+            ktok *= t;
+            n -= 1;
+        }
+        return ntok;
+    }
 }
 
 __device__
@@ -176,10 +191,30 @@ void FixedWidthInteger::negate()
 }
 
 __device__ 
-void FixedWidthInteger::permute(FixedWidthInteger& perm, 
-    FixedWidthInteger& tmp1, FixedWidthInteger& tmp2) 
+void FixedWidthInteger::permuteNth(size_t n, size_t k) {
+    // TODO: Fill buffer
+    // TODO: Use uint64_t instead of size_t?
+    size_t m = d_buffer.precision();
+    size_t mx = choose(m - 1, k); 
+    for (size_t i = 0; i < m; i++) {
+        if (n < mx) {
+            // ith bit is a 0
+        }
+        else {
+            // ith bit is a 1
+            n -= mx;
+            k--;
+            mx = choose(m - 1, k);
+        }
+    }
+}
+
+__device__ 
+void FixedWidthInteger::permuteNext(FixedWidthInteger& tmp1, 
+    FixedWidthInteger& tmp2) 
 {
-    size_t ptz = perm.trailingZeroes() + 1;
+    auto& perm = *this;
+    size_t ptz = trailingZeroes() + 1;
     tmp1 = perm;
     tmp1.decrement();
     perm |= tmp1;
@@ -193,5 +228,6 @@ void FixedWidthInteger::permute(FixedWidthInteger& perm,
     perm.increment();
     perm |= tmp1;
 }
+
 
 }
