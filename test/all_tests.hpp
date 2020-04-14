@@ -1,5 +1,5 @@
-#ifndef TESTS_HPP
-#define TESTS_HPP
+#ifndef ALL_TESTS_HPP
+#define ALL_TESTS_HPP
 
 #include <iostream>
 #include <cassert>

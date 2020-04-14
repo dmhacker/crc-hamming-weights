@@ -1,59 +1,9 @@
 #include <crcham/fixed_width_integer.hpp>
+#include <crcham/integer_operations.hpp>
 
 #include <stdio.h>
 
 namespace crcham {
-
-namespace {
-    __device__
-    size_t ctz64(uint64_t x) 
-    {
-        // Assume x is not 0, otherwise this is undefined
-        size_t result = 1;
-        if ((x & 0xFFFFFFFF) == 0) {
-            result += 32; 
-            x = x >> 32;
-        }
-        if ((x & 0x0000FFFF) == 0) {
-            result += 16; 
-            x = x >>16;
-        }
-        if ((x & 0x000000FF) == 0) {
-            result += 8; 
-            x = x >> 8;
-        }
-        if ((x & 0x0000000F) == 0) {
-            result += 4; 
-            x = x >> 4;
-        }
-        if ((x & 0x00000003) == 0) {
-            result += 2;
-            x = x >> 2;
-        }
-        return result - (x & 1);
-    }
-
-    __device__
-    uint64_t choose(uint64_t n, uint64_t k)
-    {
-        // See https://stackoverflow.com/questions/9330915/number-of-combinations-n-choose-r-in-c
-        if (k > n) {
-            return 0;
-        }
-        if (k * 2 > n) {
-            k = n - k;
-        }
-        if (k == 0) {
-            return 1;
-        }
-        uint64_t result = n;
-        for( uint64_t i = 2; i <= k; ++i ) {
-            result *= (n - i + 1);
-            result /= i;
-        }
-        return result;
-    }
-}
 
 __device__
 FixedWidthInteger::FixedWidthInteger(FixedWidthBuffer& buffer)
@@ -219,24 +169,27 @@ void FixedWidthInteger::permuteNext(FixedWidthInteger& tmp1,
 __device__ 
 void FixedWidthInteger::permuteNth(uint64_t n, size_t k) {
     size_t mmax = d_buffer.precision();
+    uint64_t* ptr = d_buffer.get();
+    size_t offset;
+    for (offset = 0; offset < d_buffer.size(); offset++) {
+        ptr[offset] = 0;
+    }
     for (size_t i = 0; i < mmax; i++) {
         size_t m = mmax - i;
-        uint64_t m1ck = choose(m - 1, k); 
-        uint64_t* ptr;
+        uint64_t m1ck = ncr64(m - 1, k); 
         if (i < mmax % 64) {
-            ptr = d_buffer.get(); 
+            offset = 0; 
         }
         else {
-            ptr = d_buffer.get() + (i - mmax % 64) / 64 + 1;
+            offset = (i - mmax % 64) / 64 + 1;
         }
-        *ptr <<= 1;
+        ptr[offset] <<= 1;
         if (n >= m1ck) {
-            *ptr |= 1;
+            ptr[offset] |= 1;
             n -= m1ck;
             k--;
         }
     }
-
 }
 
 }

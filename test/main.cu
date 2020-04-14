@@ -1,4 +1,4 @@
-#include "tests.hpp"
+#include "all_tests.hpp"
 
 #include <iostream>
 
@@ -44,8 +44,12 @@ int main() {
         std::cerr << "Unable to find a CUDA-compatible GPU." << std::endl;
         return EXIT_FAILURE;
     }
+
     testKernel<<<1, 1>>>(); 
+    std::cout << "Tests started." << std::endl;
+
     cudaDeviceSynchronize();
     std::cout << "Tests finished." << std::endl;
+
     return EXIT_SUCCESS;
 }

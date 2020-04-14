@@ -79,4 +79,22 @@ __device__
     return d_mask;
 }
 
+__device__
+bool FixedWidthBuffer::operator==(const FixedWidthBuffer& buffer) const {
+    if (d_precision != buffer.d_precision) {
+        return false;
+    }
+    for (size_t i = 0; i < d_size; i++) {
+        if (d_arr_p[i] != buffer.d_arr_p[i]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+__device__
+bool FixedWidthBuffer::operator!=(const FixedWidthBuffer& buffer) const {
+    return !(*this == buffer);
+}
+
 }

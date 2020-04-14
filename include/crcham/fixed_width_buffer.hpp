@@ -30,6 +30,11 @@ public:
     uint64_t* get() const;
     __device__
     uint64_t leadingBitMask() const;
+
+    __device__ 
+    bool operator==(const FixedWidthBuffer&) const;
+    __device__ 
+    bool operator!=(const FixedWidthBuffer&) const;
 };
 
 }

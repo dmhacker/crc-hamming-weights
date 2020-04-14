@@ -1,4 +1,4 @@
-#include "tests.hpp"
+#include "all_tests.hpp"
 
 #include <crcham/fixed_width_buffer.hpp>
 
@@ -17,10 +17,19 @@ void testFWBMetadata(size_t prec, size_t sz, uint64_t mask) {
 
 __device__
 void testFWBEquality(size_t prec) {
-    // TODO
+    FixedWidthBuffer buf1(prec);
+    FixedWidthBuffer buf2(prec);
+    assert(buf1 == buf2);
+    buf1.get()[buf1.size() - 1] = 0x1;
+    buf2.get()[buf2.size() - 1] = 0x1;
+    assert(buf1 == buf2);
 }
 
 __device__
 void testFWBInequality(size_t prec) {
-    // TODO
+    FixedWidthBuffer buf1(prec);
+    FixedWidthBuffer buf2(prec);
+    buf1.get()[buf1.size() - 1] = 0xF;
+    buf2.get()[buf2.size() - 1] = 0xA;
+    assert(buf1 != buf2);
 }

@@ -1,4 +1,4 @@
-#include "tests.hpp"
+#include "all_tests.hpp"
 
 #include <crcham/fixed_width_integer.hpp>
 
@@ -213,5 +213,6 @@ void testFWIPermute(size_t prec, size_t weight) {
         assert(perm1.hammingWeight() == weight);
         perm2.permuteNth(i + 1, weight);
         assert(perm2.hammingWeight() == weight);
+        assert(buf1 == buf2);
     }
 }
