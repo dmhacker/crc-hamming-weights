@@ -31,7 +31,7 @@ int main()
     cudaGetDeviceProperties(&device0, 0);
     std::cout << "Found CUDA device: " << device0.name << std::endl;
 
-    testKernel<<<1, 1>>>(201, 3); 
+    testKernel<<<5, 1024>>>(201, 3); 
     cudaDeviceSynchronize();
 
     return EXIT_SUCCESS;
