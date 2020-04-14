@@ -8,12 +8,12 @@ using namespace crcham;
 
 __global__
 void testKernel(size_t message_size, size_t weight) {
-    /* extern __shared__ Codeword<64> codewords[]; */
     Codeword<64> codeword;
-    uint64_t thread_count = gridDim.x * blockDim.x; 
-    uint64_t index = blockIdx.x * blockDim.x + threadIdx.x; 
+    size_t tcnt = gridDim.x * blockDim.x; 
+    size_t tid = threadIdx.x; 
+    uint64_t index = blockIdx.x * blockDim.x + tid; 
     uint64_t max_combinations = ncr64(message_size, weight);
-    for (; index < max_combinations; index += thread_count) {
+    for (; index < max_combinations; index += tcnt) {
         codeword.permute(index, message_size, weight);
         assert(codeword.popcount() == weight); 
     }
@@ -32,8 +32,7 @@ int main()
     std::cout << "Found CUDA device: " << device0.name << std::endl;
     cudaSetDeviceFlags(cudaDeviceBlockingSync);
 
-    /* testKernel<<<512, 512, 512 * sizeof(Codeword<64>)>>>(500, 4); */ 
-    testKernel<<<512, 512>>>(201, 4); 
+    testKernel<<<512, 512>>>(500, 4); 
     cudaDeviceSynchronize();
 
     return EXIT_SUCCESS;
