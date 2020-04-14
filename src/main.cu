@@ -1,8 +1,8 @@
 #include <iostream>
 #include <cassert>
 
-#include <crcham/integer_operations.hpp>
-#include <crcham/fixed_width_integer.hpp>
+#include <crcham/operations.hpp>
+#include <crcham/codeword.hpp>
 
 using namespace crcham;
 
@@ -11,11 +11,10 @@ void testKernel(size_t message_size, size_t weight) {
     uint64_t thread_count = gridDim.x * blockDim.x; 
     uint64_t index = blockIdx.x * blockDim.x + threadIdx.x; 
     uint64_t max_combinations = ncr64(message_size, weight);
-    FixedWidthBuffer codeword(message_size);
-    FixedWidthInteger permutation(codeword);
+    Codeword<17> codeword;
     for (; index < max_combinations; index += thread_count) {
-        permutation.permuteNth(index, weight);
-        assert(permutation.hammingWeight() == weight); 
+        codeword.permute(index, message_size, weight);
+        assert(codeword.popcount() == weight); 
     }
 }
 

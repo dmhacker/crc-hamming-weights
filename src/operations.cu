@@ -1,4 +1,4 @@
-#include <crcham/integer_operations.hpp>
+#include <crcham/operations.hpp>
 
 namespace crcham {
 

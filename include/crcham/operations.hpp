@@ -1,5 +1,5 @@
-#ifndef CRCHAM_INTEGER_OPERATIONS
-#define CRCHAM_INTEGER_OPERATIONS
+#ifndef CRCHAM_OPERATIONS
+#define CRCHAM_OPERATIONS
 
 #include <cstddef>
 #include <cstdint>
