@@ -1,8 +1,9 @@
 #include <iostream>
 #include <cassert>
 
-#include <crcham/operations.hpp>
 #include <crcham/codeword.hpp>
+#include <crcham/cuda.hpp>
+#include <crcham/operations.hpp>
 
 using namespace crcham;
 
@@ -21,19 +22,16 @@ void testKernel(size_t message_size, size_t weight) {
 
 int main()
 {
-    int devices = 0;
-    cudaGetDeviceCount(&devices);
-    if (devices == 0) {
-        std::cerr << "Unable to find a CUDA-compatible GPU." << std::endl;
+    CUDA cuda;
+    if (!cuda.enabled()) {
+        std::cerr << "A supported NVIDIA GPU could not be found." << std::endl;
         return EXIT_FAILURE;
     }
-    cudaDeviceProp device0;
-    cudaGetDeviceProperties(&device0, 0);
-    std::cout << "Found CUDA device: " << device0.name << std::endl;
-    cudaSetDeviceFlags(cudaDeviceBlockingSync);
+    cuda.setup();
+    std::cout << cuda;
 
     testKernel<<<512, 512>>>(500, 4); 
-    cudaDeviceSynchronize();
+    cuda.wait();
 
     return EXIT_SUCCESS;
 }

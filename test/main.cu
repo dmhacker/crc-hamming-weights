@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include <crcham/cuda.hpp>
+
 __global__
 void testKernel() {
     testCodewordEqual<1>();
@@ -20,18 +22,17 @@ void testKernel() {
 }
 
 int main() {
-    int devices = 0;
-    cudaGetDeviceCount(&devices);
-    if (devices == 0) {
-        std::cerr << "Unable to find a CUDA-compatible GPU." << std::endl;
+    crcham::CUDA cuda;
+    if (!cuda.enabled()) {
+        std::cerr << "A supported NVIDIA GPU could not be found." << std::endl;
         return EXIT_FAILURE;
     }
-    cudaSetDeviceFlags(cudaDeviceBlockingSync);
+    cuda.setup();
+    std::cout << cuda;
 
     testKernel<<<1, 1>>>(); 
     std::cout << "Tests started." << std::endl;
-
-    cudaDeviceSynchronize();
+    cuda.wait();
     std::cout << "Tests finished." << std::endl;
 
     return EXIT_SUCCESS;
