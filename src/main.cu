@@ -11,7 +11,7 @@ void testKernel(size_t message_size, size_t weight) {
     uint64_t thread_count = gridDim.x * blockDim.x; 
     uint64_t index = blockIdx.x * blockDim.x + threadIdx.x; 
     uint64_t max_combinations = ncr64(message_size, weight);
-    Codeword<17> codeword;
+    Codeword<32> codeword;
     for (; index < max_combinations; index += thread_count) {
         codeword.permute(index, message_size, weight);
         assert(codeword.popcount() == weight); 
@@ -30,7 +30,7 @@ int main()
     cudaGetDeviceProperties(&device0, 0);
     std::cout << "Found CUDA device: " << device0.name << std::endl;
 
-    testKernel<<<5, 1024>>>(1056, 4); 
+    testKernel<<<5, 1024>>>(201, 4); 
     cudaDeviceSynchronize();
 
     return EXIT_SUCCESS;

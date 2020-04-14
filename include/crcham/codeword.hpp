@@ -62,9 +62,8 @@ void Codeword<N>::permute(uint64_t n, size_t m, size_t k) {
     for (size_t i = 0; i < m; i++) {
         uint64_t binom = ncr64(m - i - 1, k); 
         size_t offset = i / 64;
-        d_arr_p[offset] <<= 1;
         if (n >= binom) {
-            d_arr_p[offset] |= 1;
+            d_arr_p[offset] |= 1ULL << (i % 64);
             n -= binom;
             k--;
         }
