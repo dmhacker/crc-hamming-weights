@@ -28,7 +28,6 @@ int main() {
         return EXIT_FAILURE;
     }
     cuda.setup();
-    std::cout << cuda;
 
     testKernel<<<1, 1>>>(); 
     std::cout << "Tests started." << std::endl;

@@ -20,6 +20,8 @@ file(GLOB_RECURSE test_sources
 CUDA_INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/include")
 CUDA_ADD_EXECUTABLE(search ${main_source} ${sources})
 CUDA_ADD_EXECUTABLE(tests ${test_sources} ${sources})
+target_include_directories(search PUBLIC "${CMAKE_SOURCE_DIR}/include")
+target_include_directories(tests PUBLIC "${CMAKE_SOURCE_DIR}/include")
 
 add_definitions(-DUSE_CUDA)
 include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}) 
