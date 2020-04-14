@@ -29,8 +29,9 @@ int main()
     cudaDeviceProp device0;
     cudaGetDeviceProperties(&device0, 0);
     std::cout << "Found CUDA device: " << device0.name << std::endl;
+    cudaSetDeviceFlags(cudaDeviceBlockingSync);
 
-    testKernel<<<5, 1024>>>(201, 4); 
+    testKernel<<<5, 1024>>>(777, 4); 
     cudaDeviceSynchronize();
 
     return EXIT_SUCCESS;
