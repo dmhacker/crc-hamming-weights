@@ -1,5 +1,5 @@
-#ifndef CRCHAM_CODEWORD
-#define CRCHAM_CODEWORD
+#ifndef CRCHAM_CODEWORD_HPP
+#define CRCHAM_CODEWORD_HPP
 
 #include <cstddef>
 #include <cstdint>
@@ -10,7 +10,7 @@ namespace crcham {
 
 template <size_t N>
 class Codeword {
-    uint64_t d_arr_p[N];
+    uint32_t d_arr_p[N];
 
 public:
     __device__ __host__
@@ -20,7 +20,7 @@ public:
     void permute(uint64_t n, size_t m, size_t k);
 
     __device__ __host__
-    uint64_t* get();
+    uint32_t* get();
     __device__ __host__
     size_t popcount() const;
 
@@ -34,12 +34,12 @@ template <size_t N>
 __device__ __host__
 Codeword<N>::Codeword()
 {
-    memset(d_arr_p, 0, N * sizeof(uint64_t));
+    memset(d_arr_p, 0, N * sizeof(uint32_t));
 }
 
 template <size_t N>
 __device__ __host__
-uint64_t* Codeword<N>::get()
+uint32_t* Codeword<N>::get()
 {
     return d_arr_p;
 }
@@ -50,7 +50,7 @@ size_t Codeword<N>::popcount() const
 {
     size_t ones = 0;
     for (size_t i = 0; i < N; i++) {
-        ones += __popcll(d_arr_p[i]);
+        ones += __popc(d_arr_p[i]);
     }
     return ones;
 }
@@ -58,12 +58,12 @@ size_t Codeword<N>::popcount() const
 template <size_t N>
 __device__ __host__
 void Codeword<N>::permute(uint64_t n, size_t m, size_t k) {
-    memset(d_arr_p, 0, N * sizeof(uint64_t));
+    memset(d_arr_p, 0, N * sizeof(uint32_t));
     for (size_t i = 0; i < m; i++) {
         uint64_t binom = ncr64(m - i - 1, k); 
-        size_t offset = i / 64;
+        size_t offset = i / 32;
         if (n >= binom) {
-            d_arr_p[offset] |= 1ULL << (i % 64);
+            d_arr_p[offset] |= (1 << (i % 32));
             n -= binom;
             k--;
         }

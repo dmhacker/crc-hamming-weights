@@ -6,17 +6,15 @@ __global__
 void testKernel() {
     testCodewordEqual<1>();
     testCodewordEqual<57>();
-    testCodewordEqual<1000>();
-    testCodewordEqual<8397>();
+    testCodewordEqual<271>();
     testCodewordInequal<1>();
     testCodewordInequal<57>();
-    testCodewordInequal<1000>();
-    testCodewordInequal<8397>();
+    testCodewordInequal<271>();
     for (size_t m = 64; m <= 256; m += 3) {
         for (size_t k = 1; k < 8; k++) {
             // Parameters chosen such that that ((k - 1) choose w) doesn't 
             // exceed the memory limits of a 64-bit unsigned integer
-            testCodewordPermute<4>(m, k);
+            testCodewordPermute<8>(m, k);
         }
     }
 }
@@ -28,6 +26,7 @@ int main() {
         std::cerr << "Unable to find a CUDA-compatible GPU." << std::endl;
         return EXIT_FAILURE;
     }
+    cudaSetDeviceFlags(cudaDeviceBlockingSync);
 
     testKernel<<<1, 1>>>(); 
     std::cout << "Tests started." << std::endl;
