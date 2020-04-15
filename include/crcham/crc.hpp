@@ -22,9 +22,8 @@ public:
     __device__ __host__
     size_t length() const;
 
-    template<size_t N>
     __device__  __host__
-    bool verify(Codeword<N> codeword);
+    uint64_t compute(const uint8_t* bytes, size_t bytelen) const;
 };
 
 
@@ -43,24 +42,9 @@ public:
     __device__ __host__
     size_t length() const;
 
-    template<size_t N>
     __device__  __host__
-    bool verify(Codeword<N> codeword);
+    uint64_t compute(const uint8_t* bytes, size_t bytelen) const;
 };
-
-template<size_t N>
-__device__ __host__
-bool NaiveCRC::verify(Codeword<N> codeword) {
-    // TODO: http://www.sunshine2k.de/articles/coding/crc/understanding_crc.html
-    return false;
-}
-
-template<size_t N>
-__device__ __host__
-bool TabularCRC::verify(Codeword<N> codeword) {
-    // TODO: http://www.sunshine2k.de/articles/coding/crc/understanding_crc.html
-    return false;
-}
 
 }
 

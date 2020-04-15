@@ -29,6 +29,13 @@ __device__ __host__
 size_t NaiveCRC::length() const {
     return d_length;
 }
+
+__device__ __host__
+uint64_t NaiveCRC::compute(const uint8_t* bytes, size_t bytelen) const {
+    // TODO: http://www.sunshine2k.de/articles/coding/crc/understanding_crc.html
+    return 0;
+}
+
  __device__ __host__
 TabularCRC::TabularCRC(uint64_t koopman) 
     : d_generator(koopman)
@@ -67,6 +74,21 @@ uint64_t TabularCRC::polynomial() const {
 __device__ __host__
 size_t TabularCRC::length() const {
     return d_length;
+}
+
+__device__ __host__
+uint64_t TabularCRC::compute(const uint8_t* bytes, size_t bytelen) const {
+    // Compute_CRC32 at http://www.sunshine2k.de/articles/coding/crc/understanding_crc.html
+    uint64_t crc = 0;
+    for (size_t i = 0; i < bytelen; i++) {
+        uint64_t msb = bytes[i];
+        msb <<= (d_length - 8);
+        msb ^= crc;
+        size_t tidx = msb >> (d_length - 8);
+        crc = (crc << 8) ^ d_table[tidx];
+        crc &= (1ULL << d_length) - 1;
+    }
+    return crc;
 }
 
 
