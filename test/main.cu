@@ -30,17 +30,17 @@ void testKernel() {
     testCRCMetadata(0x10000000000d, 0x1b, 45);
     testCRCMetadata(0xd6c9e91aca649ad4, 0xad93d23594c935a9, 64);
     // 8, 16, 32, 64-bit tabular CRC tests
-    testCRCComputeTabular("Test message", 0xe7, 0x6e);
-    testCRCComputeTabular("This is a test", 0xc5db, 0x5fc2);
-    testCRCComputeTabular("Another test", 0xad0424f3, 0x545885e5);
-    testCRCComputeTabular("A fourth test", 0xd6c9e91aca649ad4, 0x802de9d103f28376);
-    // 11, 14, 27, 30, 35, 56-bit tabular CRC tests
-    testCRCComputeTabular("Test test test", 0x5db, 0x23c);
-    /* testCRCComputeTabular("all lowercase and extra", 0x2402, 0x201); */
-    testCRCComputeTabular("2912889378278", 0x5e04635, 0x756a6e);
-    /* testCRCComputeTabular("AHAHAHAHAHHAHAHAHAHA2891...", 0x31342a2f, 0x4df2461); */
-    testCRCComputeTabular("Wowweeeee CRC!", 0x400000002, 0xc87d1522);
-    testCRCComputeTabular("Deadbeef?yepp.", 0x8000000000004a, 0xbd82b3c6ff47ca);
+    testCRCCompute<crcham::TabularCRC>("Test message", 0xe7, 0x6e);
+    testCRCCompute<crcham::TabularCRC>("This is a test", 0xc5db, 0x5fc2);
+    testCRCCompute<crcham::TabularCRC>("Another test", 0xad0424f3, 0x545885e5);
+    testCRCCompute<crcham::TabularCRC>("A fourth test", 0xd6c9e91aca649ad4, 0x802de9d103f28376);
+    /* // 11, 14, 27, 30, 35, 56-bit tabular CRC tests */
+    /* testCRCCompute<crcham::TabularCRC>("Test test test", 0x5db, 0x23c); */
+    /* testCRCCompute<crcham::TabularCRC>("all lowercase and extra", 0x2402, 0x201); */
+    /* testCRCCompute<crcham::TabularCRC>("2912889378278", 0x5e04635, 0x756a6e); */
+    /* testCRCCompute<crcham::TabularCRC>("AHAHAHAHAHHAHAHAHAHA2891...", 0x31342a2f, 0x4df2461); */
+    /* testCRCCompute<crcham::TabularCRC>("Wowweeeee CRC!", 0x400000002, 0xc87d1522); */
+    /* testCRCCompute<crcham::TabularCRC>("Deadbeef?yepp.", 0x8000000000004a, 0xbd82b3c6ff47ca); */
 }
 
 int main() {

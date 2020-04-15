@@ -30,9 +30,10 @@ __device__ __host__ void testCRCMetadata(uint64_t koopman, uint64_t normal, size
     assert(bits == tcrc.length());
 }
 
-__device__ __host__ void testCRCComputeTabular(const char message[], uint64_t koopman, uint64_t crc)
+template <class CRC>
+__device__ __host__ void testCRCCompute(const char message[], uint64_t koopman, uint64_t crc)
 {
-    crcham::TabularCRC tcrc(koopman);
+    CRC tcrc(koopman);
     uint64_t result = tcrc.compute(reinterpret_cast<const uint8_t*>(message), strsize(message));
     assert(crc == result);
 }
