@@ -2,7 +2,7 @@
 #define TEST_CODEWORD_HPP
 
 #include <cassert>
-#include <stdio.h>
+#include <cstdint>
 
 #include <crcham/codeword.hpp>
 

@@ -2,9 +2,7 @@
 #define TEST_CRC_HPP
 
 #include <cassert>
-#include <cstring>
-#include <iostream>
-#include <stdio.h>
+#include <cstdint>
 
 #include <crcham/crc.hpp>
 
@@ -33,9 +31,10 @@ __device__ __host__ void testCRCMetadata(uint64_t koopman, uint64_t normal, size
 template <class CRC>
 __device__ __host__ void testCRCCompute(const char message[], uint64_t koopman, uint64_t crc)
 {
-    CRC tcrc(koopman);
-    uint64_t result = tcrc.compute(reinterpret_cast<const uint8_t*>(message), strsize(message));
-    assert(crc == result);
+    CRC acrc(koopman);
+    uint64_t computed = 
+        acrc.compute(reinterpret_cast<const uint8_t*>(message), strsize(message));
+    assert(crc == computed);
 }
 
 #endif

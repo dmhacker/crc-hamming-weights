@@ -10,7 +10,7 @@ namespace crcham {
 
 class NaiveCRC {
 private:
-    size_t d_length;
+    size_t d_polylen;
     uint64_t d_generator;
 
 public:
@@ -29,7 +29,7 @@ public:
 
 class TabularCRC {
 private:
-    size_t d_length;
+    size_t d_polylen;
     uint64_t d_generator;
     uint64_t d_table[256];
 
