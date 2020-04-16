@@ -4,8 +4,6 @@
 #include <cstddef>
 #include <cstdint>
 
-#include <crcham/codeword.hpp>
-
 namespace crcham {
 
 class NaiveCRC {
@@ -22,7 +20,7 @@ public:
     __device__ __host__
     size_t length() const;
 
-    __device__  __host__
+    __device__ __host__
     uint64_t compute(const uint8_t* bytes, size_t bytelen) const;
 };
 
@@ -34,7 +32,7 @@ private:
     uint64_t d_table[256];
 
 public:
-    __device__  __host__
+    __device__ __host__
     TabularCRC(uint64_t koopman);
 
     __device__ __host__
@@ -42,7 +40,7 @@ public:
     __device__ __host__
     size_t length() const;
 
-    __device__  __host__
+    __device__ __host__
     uint64_t compute(const uint8_t* bytes, size_t bytelen) const;
 };
 

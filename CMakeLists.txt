@@ -6,20 +6,20 @@ SET(CUDA_SEPARABLE_COMPILATION ON)
 
 find_package(CUDA 8.0)
 
-file(GLOB_RECURSE sources
+file(GLOB_RECURSE lib_sources
     "${CMAKE_SOURCE_DIR}/src/*.cpp"
     "${CMAKE_SOURCE_DIR}/src/*.cu"
 )
 set(main_source "${CMAKE_SOURCE_DIR}/src/main.cu")
-list(REMOVE_ITEM sources ${main_source})
+list(REMOVE_ITEM lib_sources ${main_source})
 file(GLOB_RECURSE test_sources
     "${CMAKE_SOURCE_DIR}/test/*.cpp"
     "${CMAKE_SOURCE_DIR}/test/*.cu"
 )
 
 CUDA_INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/include")
-CUDA_ADD_EXECUTABLE(search ${main_source} ${sources})
-CUDA_ADD_EXECUTABLE(tests ${test_sources} ${sources})
+CUDA_ADD_EXECUTABLE(search ${main_source} ${lib_sources})
+CUDA_ADD_EXECUTABLE(tests ${test_sources} ${lib_sources})
 target_include_directories(search PUBLIC "${CMAKE_SOURCE_DIR}/include")
 target_include_directories(tests PUBLIC "${CMAKE_SOURCE_DIR}/include")
 
