@@ -30,7 +30,7 @@ int main()
     cuda.setup();
     std::cout << cuda;
 
-    testKernel<<<512, 512>>>(300, 4); 
+    testKernel<<<512, 512>>>(250, 4); 
     cuda.wait();
 
     return EXIT_SUCCESS;
