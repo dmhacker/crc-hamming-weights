@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5.1)
 project(crc-hamming-distance)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
-SET(CUDA_SEPARABLE_COMPILATION ON)
+set(CUDA_SEPARABLE_COMPILATION ON)
 
 include(CTest)
 include(cmake/Catch.cmake)
@@ -19,11 +19,14 @@ file(GLOB_RECURSE test_sources
     "${CMAKE_SOURCE_DIR}/test/*.cu"
 )
 
+# In the future, the library sources should be compiled separately
+# with the two executables linking the library
 CUDA_INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/include")
 CUDA_ADD_EXECUTABLE(search ${main_source} ${lib_sources})
 CUDA_ADD_EXECUTABLE(tests ${test_sources} ${lib_sources})
 target_include_directories(search PUBLIC "${CMAKE_SOURCE_DIR}/include")
 target_include_directories(tests PUBLIC "${CMAKE_SOURCE_DIR}/include")
+
 catch_discover_tests(tests)
 
 add_definitions(-DUSE_CUDA)
