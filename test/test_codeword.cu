@@ -13,8 +13,8 @@ void testCodewordEqual() {
     crcham::Codeword<N> cw1;
     crcham::Codeword<N> cw2;
     assert(cw1 == cw2);
-    cw1.get()[N - 1] = 0x1;
-    cw2.get()[N - 1] = 0x1;
+    cw1[N - 1] = 0x1;
+    cw2[N - 1] = 0x1;
     assert(cw1 == cw2);
 }
 
@@ -22,8 +22,8 @@ template <size_t N>
 void testCodewordInequal() {
     crcham::Codeword<N> cw1;
     crcham::Codeword<N> cw2;
-    cw1.get()[N - 1] = 0xF;
-    cw2.get()[N - 1] = 0xA;
+    cw1[N - 1] = 0xF;
+    cw2[N - 1] = 0xA;
     assert(cw1 != cw2);
 }
 

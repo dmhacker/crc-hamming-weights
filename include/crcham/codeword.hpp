@@ -21,7 +21,7 @@ public:
     void permute(uint64_t n, size_t m, size_t k);
 
     __device__ __host__
-    uint32_t* get();
+    uint32_t& operator[](size_t index);
     __device__ __host__
     size_t popcount() const;
 
@@ -33,21 +33,21 @@ public:
 
 template <size_t N>
 __device__ __host__
-Codeword<N>::Codeword()
+inline Codeword<N>::Codeword()
 {
     memset(d_arr_p, 0, N * sizeof(uint32_t));
 }
 
 template <size_t N>
 __device__ __host__
-uint32_t* Codeword<N>::get()
+inline uint32_t& Codeword<N>::operator[](size_t index)
 {
-    return d_arr_p;
+    return d_arr_p[index];
 }
 
 template <size_t N>
 __device__ __host__
-size_t Codeword<N>::popcount() const
+inline size_t Codeword<N>::popcount() const
 {
     size_t ones = 0;
     for (size_t i = 0; i < N; i++) {
@@ -62,7 +62,7 @@ size_t Codeword<N>::popcount() const
 
 template <size_t N>
 __device__ __host__
-void Codeword<N>::permute(uint64_t n, size_t m, size_t k) {
+inline void Codeword<N>::permute(uint64_t n, size_t m, size_t k) {
     memset(d_arr_p, 0, N * sizeof(uint32_t));
     for (size_t i = 0; i < m; i++) {
         uint64_t binom = ncr64(m - i - 1, k); 
@@ -79,7 +79,7 @@ void Codeword<N>::permute(uint64_t n, size_t m, size_t k) {
 
 template <size_t N>
 __device__ __host__
-bool Codeword<N>::operator==(const Codeword& other) const {
+inline bool Codeword<N>::operator==(const Codeword& other) const {
     for (size_t i = 0; i < N; i++) {
         if (d_arr_p[i] != other.d_arr_p[i]) {
             return false;
@@ -90,7 +90,7 @@ bool Codeword<N>::operator==(const Codeword& other) const {
 
 template <size_t N>
 __device__ __host__
-bool Codeword<N>::operator!=(const Codeword& other) const {
+inline bool Codeword<N>::operator!=(const Codeword& other) const {
     return !(*this == other);
 }
 
