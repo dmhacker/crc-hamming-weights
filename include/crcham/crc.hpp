@@ -16,7 +16,7 @@ public:
     NaiveCRC(uint64_t koopman);
 
     __device__ __host__
-    uint64_t polynomial() const;
+    uint64_t normal() const;
     __device__ __host__
     size_t length() const;
 
@@ -36,7 +36,7 @@ public:
     TabularCRC(uint64_t koopman);
 
     __device__ __host__
-    uint64_t polynomial() const;
+    uint64_t normal() const;
     __device__ __host__
     size_t length() const;
 

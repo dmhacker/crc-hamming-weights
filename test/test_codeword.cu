@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <cstdio>
 
 #include <crcham/codeword.hpp>
 
@@ -27,9 +28,9 @@ void testCodewordInequal() {
 }
 
 template <size_t N>
-void testCodewordPermute(size_t bitcount, size_t popcount) {
+void testCodewordPermute(size_t bitcount, size_t popcount, size_t iterations) {
     crcham::Codeword<N> cw1;
-    for (size_t i = 0; i < 64; i++) {
+    for (size_t i = 0; i < iterations; i++) {
         cw1.permute(i, bitcount, popcount);
         assert(cw1.popcount() == popcount);
     }
@@ -37,7 +38,7 @@ void testCodewordPermute(size_t bitcount, size_t popcount) {
 
 }
 
-TEST_CASE("Codewords can be compared for equality") {
+TEST_CASE("Codeword equality comparisons") {
     testCodewordEqual<1>();
     testCodewordEqual<57>();
     testCodewordEqual<271>();
@@ -46,12 +47,12 @@ TEST_CASE("Codewords can be compared for equality") {
     testCodewordInequal<271>();
 }
 
-TEST_CASE("Codewords can be permuted correctly") {
-    for (size_t m = 64; m <= 256; m += 3) {
+TEST_CASE("Codeword permutation generation") {
+    for (size_t m = 64; m <= 256; m++) {
         for (size_t k = 1; k < 8; k++) {
             // Parameters chosen such that that ((k - 1) choose w) doesn't 
             // exceed the memory limits of a 64-bit unsigned integer
-            testCodewordPermute<8>(m, k);
+            testCodewordPermute<8>(m, k, 16);
         }
     }   
 }

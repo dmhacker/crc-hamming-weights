@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <stdio.h>
 
 #include <crcham/operations.hpp>
 
@@ -65,9 +66,11 @@ void Codeword<N>::permute(uint64_t n, size_t m, size_t k) {
     memset(d_arr_p, 0, N * sizeof(uint32_t));
     for (size_t i = 0; i < m; i++) {
         uint64_t binom = ncr64(m - i - 1, k); 
-        size_t offset = i / 32;
         if (n >= binom) {
-            d_arr_p[offset] |= (1 << (i % 32));
+            // ai = absolute index, aligns indices with 
+            // the right edge of the available array
+            size_t ai = 32 * N - m + i;
+            d_arr_p[ai / 32] |= (1 << (31 - ai % 32));
             n -= binom;
             k--;
         }

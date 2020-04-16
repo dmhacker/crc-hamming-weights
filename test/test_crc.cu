@@ -10,10 +10,10 @@ namespace {
 void testCRCMetadata(uint64_t koopman, uint64_t normal, size_t bits)
 {
     crcham::NaiveCRC ncrc(koopman);
-    REQUIRE(normal == ncrc.polynomial());
+    REQUIRE(normal == ncrc.normal());
     REQUIRE(bits == ncrc.length());
     crcham::TabularCRC tcrc(koopman);
-    REQUIRE(normal == tcrc.polynomial());
+    REQUIRE(normal == tcrc.normal());
     REQUIRE(bits == tcrc.length());
 }
 
@@ -28,7 +28,7 @@ void testCRCCompute(const char message[], uint64_t koopman, uint64_t crc)
 
 }
 
-TEST_CASE("Metadata extracted from Koopman representation") {
+TEST_CASE("CRC translation from Koopman to normal form") {
     testCRCMetadata(0xe7, 0xcf, 8);
     testCRCMetadata(0x1abf, 0x157f, 13);
     testCRCMetadata(0x8d95, 0x1b2b, 16);
@@ -40,7 +40,7 @@ TEST_CASE("Metadata extracted from Koopman representation") {
     testCRCMetadata(0xd6c9e91aca649ad4, 0xad93d23594c935a9, 64);
 }
 
-TEST_CASE("CRCs computed using a bit-by-bit shift register") {
+TEST_CASE("Shift register CRC computation") {
     SECTION("3, 4, 5, 6, 7-bit CRCs") {
         testCRCCompute<crcham::NaiveCRC>("3T", 0x5, 0x5);
         testCRCCompute<crcham::NaiveCRC>("4T", 0x9, 0x1);
@@ -66,7 +66,7 @@ TEST_CASE("CRCs computed using a bit-by-bit shift register") {
     }
 }
 
-TEST_CASE("CRCs computed using a lookup table") {
+TEST_CASE("Lookup table CRC computation") {
     SECTION("8, 16, 32, 64-bit CRCs") {
         testCRCCompute<crcham::TabularCRC>("Test message", 0xe7, 0x6e);
         testCRCCompute<crcham::TabularCRC>("This is a test", 0xc5db, 0x5fc2);

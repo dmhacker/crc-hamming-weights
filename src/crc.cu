@@ -22,7 +22,7 @@ NaiveCRC::NaiveCRC(uint64_t koopman)
 }
 
 __device__ __host__
-uint64_t NaiveCRC::polynomial() const {
+uint64_t NaiveCRC::normal() const {
     return d_generator;
 }
 
@@ -82,7 +82,7 @@ TabularCRC::TabularCRC(uint64_t koopman)
 }
 
 __device__ __host__
-uint64_t TabularCRC::polynomial() const {
+uint64_t TabularCRC::normal() const {
     return d_generator;
 }
 
