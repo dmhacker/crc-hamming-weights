@@ -37,7 +37,7 @@ void hammingWeight(size_t* weights, CRC crc, size_t message_bits, size_t error_b
         permute(codeword_int_ptr, codeword_ints, pidx, codeword_bits, error_bits);
         assert(popcount(codeword_int_ptr, codeword_ints) == error_bits); 
         // Test to see if the codeword with errors is considered valid
-        uint64_t error_crc = extract(codeword_byte_ptr, codeword_bytes, codeword_bits, error_bits);
+        uint64_t error_crc = extract(codeword_byte_ptr, codeword_bytes, codeword_bits, crc.length());
         uint64_t good_crc = crc.compute(codeword_byte_ptr, codeword_bytes);
         if (error_crc == good_crc) {
             weight++;
