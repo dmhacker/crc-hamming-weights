@@ -11,11 +11,7 @@ namespace crcham {
 
 template <class CRC>
 __global__
-void hammingWeightHeap(size_t* weights, CRC crc, size_t message_bits, size_t error_bits);
-
-template <class CRC>
-__global__
-void hammingWeightHeap(size_t* weights, CRC crc, size_t message_bits, size_t error_bits) {
+void hammingWeight(size_t* weights, CRC crc, size_t message_bits, size_t error_bits) {
     size_t codeword_bits = message_bits + crc.length();
     size_t codeword_size = codeword_bits / 32;
     if (codeword_bits % 32 != 0) {
@@ -31,9 +27,10 @@ void hammingWeightHeap(size_t* weights, CRC crc, size_t message_bits, size_t err
     for (; pidx < pmax; pidx += pincr) {
         permute(codeword, codeword_size, pidx, codeword_bits, error_bits);
         assert(popcount(codeword, codeword_size) == error_bits); 
+        
         weight++;
     }
-    weights[blockIdx.x * blockDim.x + threadIdx.x] = 1;
+    weights[blockIdx.x * blockDim.x + threadIdx.x] = weight;
 
     free(codeword);
 }

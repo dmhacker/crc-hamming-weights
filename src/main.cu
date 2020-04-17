@@ -28,7 +28,8 @@ int main()
     // Find optimal block and grid sizes
     int grid_size;
     int block_size;
-    cudaOccupancyMaxPotentialBlockSize(&grid_size, &block_size, crcham::hammingWeightHeap<crcham::TabularCRC>);
+    cudaOccupancyMaxPotentialBlockSize(&grid_size, &block_size, 
+        crcham::hammingWeight<crcham::TabularCRC>);
 
     // Set maximum allowable memory sizes
     size_t original_heap;
@@ -44,11 +45,11 @@ int main()
     // Run the kernel and block until it is done
     crcham::NaiveCRC ncrc(polynomial);
     if (ncrc.length() < 8) {
-        crcham::hammingWeightHeap<crcham::NaiveCRC><<<grid_size, block_size>>>(weights, ncrc, message_bits, error_bits); 
+        crcham::hammingWeight<crcham::NaiveCRC><<<grid_size, block_size>>>(weights, ncrc, message_bits, error_bits); 
     }
     else {
         crcham::TabularCRC tcrc(polynomial);
-        crcham::hammingWeightHeap<crcham::TabularCRC><<<grid_size, block_size>>>(weights, tcrc, message_bits, error_bits); 
+        crcham::hammingWeight<crcham::TabularCRC><<<grid_size, block_size>>>(weights, tcrc, message_bits, error_bits); 
     }
     cudaDeviceSynchronize();
 
