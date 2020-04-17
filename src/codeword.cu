@@ -4,14 +4,14 @@
 namespace crcham {
 
 __device__ __host__
-void permute(uint32_t* arr, size_t len, uint64_t n, size_t m, size_t k) {
-    memset(arr, 0, len * sizeof(uint32_t));
+void permute(uint8_t* arr, size_t len, uint64_t n, size_t m, size_t k) {
+    memset(arr, 0, len * sizeof(uint8_t));
     for (size_t i = 0; i < m; i++) {
         uint64_t binom = ncrll(m - i - 1, k); 
         if (n >= binom) {
             // Align last index with the end of the buffer
-            size_t ia = 32 * len - m + i;
-            arr[ia / 32] |= (1 << (31 - ia % 32));
+            size_t ia = 8 * len - m + i;
+            arr[ia / 8] |= (1 << (7 - ia % 8));
             n -= binom;
             k--;
         }
@@ -35,7 +35,7 @@ uint64_t extract(uint8_t* arr, size_t len, size_t bits, size_t polybits) {
 }
 
 __device__ __host__
-size_t popcount(const uint32_t* arr, size_t len) {
+size_t popcount(const uint8_t* arr, size_t len) {
     size_t ones = 0;
     for (size_t i = 0; i < len; i++) {
 #ifdef __CUDA_ARCH__

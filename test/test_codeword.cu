@@ -8,8 +8,8 @@
 namespace {
 
 void testPermute(size_t bitcount, size_t popcount, size_t iterations) {
-    size_t buflen = bitcount % 32 == 0 ? bitcount / 32 : bitcount / 32 + 1;
-    uint32_t* buffer = new uint32_t[buflen];
+    size_t buflen = bitcount % 8 == 0 ? bitcount / 8 : bitcount / 8 + 1;
+    uint8_t* buffer = new uint8_t[buflen];
     for (size_t i = 0; i < iterations; i++) {
         crcham::permute(buffer, buflen, i, bitcount, popcount);
         REQUIRE(crcham::popcount(buffer, buflen) == popcount);
@@ -17,14 +17,13 @@ void testPermute(size_t bitcount, size_t popcount, size_t iterations) {
 }
 
 void testExtract(size_t bitcount, size_t extractcount) {
-    size_t buflen = bitcount % 32 == 0 ? bitcount / 32 : bitcount / 32 + 1;
-    buflen *= 4;
+    size_t buflen = bitcount % 8 == 0 ? bitcount / 8 : bitcount / 8 + 1;
     uint8_t* buffer = new uint8_t[buflen];
     for (size_t i = 0; i < buflen; i++) {
         buffer[i] = 255;
     }
     uint64_t result = crcham::extract(buffer, buflen, bitcount, extractcount);
-    size_t bufpop = crcham::popcount(reinterpret_cast<uint32_t*>(buffer), buflen / 4);
+    size_t bufpop = crcham::popcount(buffer, buflen);
     size_t respop = __builtin_popcountll(result);
     REQUIRE(respop == extractcount);
     REQUIRE(respop + bufpop == buflen * 8);
