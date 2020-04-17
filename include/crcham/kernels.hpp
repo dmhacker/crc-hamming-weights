@@ -27,6 +27,7 @@ void hammingWeight(size_t* weights, CRC crc, size_t message_bits, size_t error_b
         codeword_int_ptr);
     size_t codeword_bytes = codeword_ints * 4;
 
+    const size_t widx = blockIdx.x * blockDim.x + threadIdx.x;
     size_t pincr = gridDim.x * blockDim.x; 
     uint64_t pidx = blockIdx.x * blockDim.x + threadIdx.x; 
     uint64_t pmax = ncrll(codeword_bits, error_bits);
@@ -36,6 +37,16 @@ void hammingWeight(size_t* weights, CRC crc, size_t message_bits, size_t error_b
         // Permute the bytes in the ${pidx}th way
         permute(codeword_int_ptr, codeword_ints, pidx, codeword_bits, error_bits);
         assert(popcount(codeword_int_ptr, codeword_ints) == error_bits); 
+        // Fix little endianness issues
+        for (size_t i = 0; i < codeword_bytes; i += 4) {
+            uint8_t tmp;
+            tmp = codeword_byte_ptr[i];
+            codeword_byte_ptr[i] = codeword_byte_ptr[i + 3];
+            codeword_byte_ptr[i + 3] = tmp;
+            tmp = codeword_byte_ptr[i + 1];
+            codeword_byte_ptr[i + 1] = codeword_byte_ptr[i + 2];
+            codeword_byte_ptr[i + 2] = tmp;
+        }
         // Test to see if the codeword with errors is considered valid
         uint64_t error_crc = extract(codeword_byte_ptr, codeword_bytes, codeword_bits, crc.length());
         uint64_t good_crc = crc.compute(codeword_byte_ptr, codeword_bytes);
@@ -43,7 +54,7 @@ void hammingWeight(size_t* weights, CRC crc, size_t message_bits, size_t error_b
             weight++;
         }
     }
-    weights[blockIdx.x * blockDim.x + threadIdx.x] = weight;
+    weights[widx] = weight;
 
     free(codeword_int_ptr);
 }
