@@ -27,7 +27,12 @@ void hammingWeight(size_t* weights, CRC crc, size_t message_bits, size_t error_b
     for (; pidx < pmax; pidx += pincr) {
         permute(codeword, codeword_size, pidx, codeword_bits, error_bits);
         assert(popcount(codeword, codeword_size) == error_bits); 
-        
+        // TODO: Last index of permutation is aligned with the end of the codeword
+        // Find first index of permutation in buffer
+        // Extract polynomial from beginning of permutation
+        // Zero out extracted bits
+        // Compute CRC using codeword buffer
+        // If CRC matches extracted bits, then, increment weights by 1
         weight++;
     }
     weights[blockIdx.x * blockDim.x + threadIdx.x] = weight;
