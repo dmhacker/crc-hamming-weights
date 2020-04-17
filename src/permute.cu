@@ -9,10 +9,7 @@ void permute(uint32_t* arr, size_t len, uint64_t n, size_t m, size_t k) {
     for (size_t i = 0; i < m; i++) {
         uint64_t binom = ncrll(m - i - 1, k); 
         if (n >= binom) {
-            // ai = absolute index, aligns indices with 
-            // the right edge of the available array
-            size_t ai = 32 * len - m + i;
-            arr[ai / 32] |= (1 << (31 - ai % 32));
+            arr[i / 32] |= (1 << (i % 32));
             n -= binom;
             k--;
         }

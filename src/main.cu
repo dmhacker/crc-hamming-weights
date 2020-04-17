@@ -9,12 +9,11 @@ using namespace crcham;
 
 __global__
 void testKernel(size_t message_size, size_t weight) {
-    /* size_t buflen = message_size / 32; */
-    /* if (message_size % 32 != 0) { */
-    /*     buflen++; */
-    /* } */
-    /* auto buffer = static_cast<uint32_t*>(malloc(buflen * sizeof(uint32_t))); */
-    uint32_t buffer[10];
+    size_t buflen = message_size / 32;
+    if (message_size % 32 != 0) {
+        buflen++;
+    }
+    auto buffer = static_cast<uint32_t*>(malloc(buflen * sizeof(uint32_t)));
 
     size_t tid = threadIdx.x; 
     size_t pincr = gridDim.x * blockDim.x; 
@@ -22,11 +21,11 @@ void testKernel(size_t message_size, size_t weight) {
     uint64_t pmax = ncrll(message_size, weight);
 
     for (; pidx < pmax; pidx += pincr) {
-        permute(buffer, 10, pidx, message_size, weight);
-        assert(popcount(buffer, 10) == weight); 
+        permute(buffer, buflen, pidx, message_size, weight);
+        assert(popcount(buffer, buflen) == weight); 
     }
 
-    /* free(buffer); */
+    free(buffer);
 }
 
 int main()
