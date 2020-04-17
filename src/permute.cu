@@ -19,7 +19,18 @@ void permute(uint32_t* arr, size_t len, uint64_t n, size_t m, size_t k) {
 }
 
 __device__ __host__
-size_t popcount(uint32_t* arr, size_t len) {
+uint64_t extract(uint8_t* arr, size_t len, size_t m, size_t k) {
+    // TODO: Last index of permutation is aligned with the end of the codeword
+    // Find first index of permutation in buffer
+    // Extract polynomial from beginning of permutation
+    // Zero out extracted bits
+    // Compute CRC using codeword buffer
+    // If CRC matches extracted bits, then, increment weights by 1
+    return 0;
+}
+
+__device__ __host__
+size_t popcount(const uint32_t* arr, size_t len) {
     size_t ones = 0;
     for (size_t i = 0; i < len; i++) {
 #ifdef __CUDA_ARCH__

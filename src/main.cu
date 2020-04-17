@@ -1,7 +1,6 @@
 #include <iostream>
 #include <cassert>
 
-#include <crcham/codeword.hpp>
 #include <crcham/permute.hpp>
 #include <crcham/math.hpp>
 #include <crcham/kernels.hpp>
@@ -9,7 +8,7 @@
 int main()
 {
     uint64_t polynomial = 0xa; 
-    size_t message_bits = 300;
+    size_t message_bits = 250;
     size_t error_bits = 4;
 
     // Check that there is an available CUDA device
