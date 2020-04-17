@@ -6,8 +6,8 @@
 int main()
 {
     uint64_t polynomial = 0x101690c; 
-    size_t message_bits = 13;
-    size_t error_bits = 8;
+    size_t message_bits = 72;
+    size_t error_bits = 6;
 
     // Check that there is an available CUDA device
     {
