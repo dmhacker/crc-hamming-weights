@@ -4,8 +4,8 @@
 #include <cassert>
 #include <cstdio>
 
+#include <crcham/codeword.hpp>
 #include <crcham/crc.hpp>
-#include <crcham/permute.hpp>
 #include <crcham/math.hpp>
 
 namespace crcham {

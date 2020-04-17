@@ -1,8 +1,6 @@
 #include <iostream>
 #include <cassert>
 
-#include <crcham/permute.hpp>
-#include <crcham/math.hpp>
 #include <crcham/kernels.hpp>
 
 int main()

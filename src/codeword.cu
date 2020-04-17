@@ -1,5 +1,5 @@
+#include <crcham/codeword.hpp>
 #include <crcham/math.hpp>
-#include <crcham/permute.hpp>
 
 namespace crcham {
 

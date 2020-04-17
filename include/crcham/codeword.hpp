@@ -1,5 +1,5 @@
-#ifndef CRCHAM_PERMUTE_HPP 
-#define CRCHAM_PERMUTE_HPP
+#ifndef CRCHAM_CODEWORD_HPP 
+#define CRCHAM_CODEWORD_HPP
 
 #include <cstddef>
 #include <cstdint>
