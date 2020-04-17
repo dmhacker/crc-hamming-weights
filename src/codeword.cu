@@ -25,11 +25,11 @@ uint64_t extract(uint8_t* arr, size_t len, size_t bits, size_t polybits) {
         size_t ia = 8 * len - bits + i;
         size_t byte = ia / 8;
         uint8_t selector = 1 << (7 - ia % 8);
+        shiftr <<= 1;
         if (arr[byte] & selector) {
             shiftr |= 1;
             arr[byte] ^= selector;
         }
-        shiftr <<= 1;
     }
     return shiftr;
 }
