@@ -4,34 +4,13 @@
 #include <crcham/codeword.hpp>
 #include <crcham/permute.hpp>
 #include <crcham/math.hpp>
-
-using namespace crcham;
-
-__global__
-void testKernel(size_t message_size, size_t weight) {
-    size_t buflen = message_size / 32;
-    if (message_size % 32 != 0) {
-        buflen++;
-    }
-    auto buffer = static_cast<uint32_t*>(malloc(buflen * sizeof(uint32_t)));
-
-    size_t tid = threadIdx.x; 
-    size_t pincr = gridDim.x * blockDim.x; 
-    uint64_t pidx = blockIdx.x * blockDim.x + tid; 
-    uint64_t pmax = ncrll(message_size, weight);
-
-    for (; pidx < pmax; pidx += pincr) {
-        permute(buffer, buflen, pidx, message_size, weight);
-        assert(popcount(buffer, buflen) == weight); 
-    }
-
-    free(buffer);
-}
+#include <crcham/kernels.hpp>
 
 int main()
 {
-    size_t message_size = 300;
-    size_t hamming_weight = 4;
+    uint64_t polynomial = 0xa; 
+    size_t message_bits = 300;
+    size_t error_bits = 4;
 
     // Check that there is an available CUDA device
     {
@@ -49,17 +28,36 @@ int main()
     // Find optimal block and grid sizes
     int grid_size;
     int block_size;
-    cudaOccupancyMaxPotentialBlockSize(&grid_size, &block_size, testKernel);
+    cudaOccupancyMaxPotentialBlockSize(&grid_size, &block_size, crcham::hammingWeightHeap<crcham::TabularCRC>);
 
     // Set maximum allowable memory sizes
     size_t original_heap;
-    size_t required_heap = 2 * grid_size * block_size * (message_size / 8);
+    size_t required_heap = 2 * grid_size * block_size * (message_bits / 8);
     cudaDeviceGetLimit(&original_heap, cudaLimitMallocHeapSize);
     cudaDeviceSetLimit(cudaLimitMallocHeapSize, std::max(original_heap, required_heap));
 
+    // Allocate memory for thread-local weights
+    size_t* weights;
+    cudaMallocManaged(&weights, grid_size * block_size * sizeof(size_t));
+    cudaMemset(weights, 0, grid_size * block_size * sizeof(size_t));
+
     // Run the kernel and block until it is done
-    testKernel<<<grid_size, block_size>>>(message_size, hamming_weight); 
+    crcham::NaiveCRC ncrc(polynomial);
+    if (ncrc.length() < 8) {
+        crcham::hammingWeightHeap<crcham::NaiveCRC><<<grid_size, block_size>>>(weights, ncrc, message_bits, error_bits); 
+    }
+    else {
+        crcham::TabularCRC tcrc(polynomial);
+        crcham::hammingWeightHeap<crcham::TabularCRC><<<grid_size, block_size>>>(weights, tcrc, message_bits, error_bits); 
+    }
     cudaDeviceSynchronize();
+
+    // Accumulate results from all threads
+    size_t weight = 0;
+    for (size_t i = 0; i < grid_size * block_size; i++) {
+        weight += weights[i];
+    }
+    std::cout << "Hamming Weight = " << weight << std::endl;
 
     return EXIT_SUCCESS;
 }
