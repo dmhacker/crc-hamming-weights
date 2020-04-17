@@ -1,9 +1,9 @@
-#include <crcham/operations.hpp>
+#include <crcham/math.hpp>
 
 namespace crcham {
 
 __device__ __host__
-uint64_t ncr64(uint64_t n, uint64_t k)
+uint64_t ncrll(uint64_t n, uint64_t k)
 {
     // See https://stackoverflow.com/questions/9330915/number-of-combinations-n-choose-r-in-c
     if (k > n) {
