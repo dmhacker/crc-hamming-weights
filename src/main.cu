@@ -3,11 +3,50 @@
 
 #include <crcham/kernels.hpp>
 
-int main()
+#include <cxxopts.hpp>
+
+int main(int argc, char** argv)
 {
-    uint64_t polynomial = 0x4297b0; 
-    size_t message_bits = 42;
-    size_t error_bits = 7;
+    cxxopts::Options options("crcham", "Calculate the hamming weights of CRC polynomials");
+    options.add_options()("p,poly", "CRC in Koopman notation (implicit +1)", cxxopts::value<uint64_t>());
+    options.add_options()("m,message", "Message length in bits", cxxopts::value<size_t>());
+    options.add_options()("e,errors", "Number of bit errors in the message", cxxopts::value<size_t>());
+    options.add_options()("h,help", "Print help message");
+    auto result = options.parse(argc, argv);
+    
+    if (result.count("help") > 0) {
+        std::cout << options.help();
+        return EXIT_SUCCESS;
+    }
+
+    uint64_t polynomial;
+    try {
+        polynomial = result["poly"].as<uint64_t>();
+    } catch (std::exception& ex) {
+        std::cerr << "Unable to interpret polynomial: " << ex.what() << std::endl;
+        std::cerr << "Consider using https://users.ece.cmu.edu/~koopman/crc/crc32.html to select parameters." << std::endl;
+        return EXIT_SUCCESS;
+    }
+
+    size_t message_bits;
+    try {
+        message_bits = result["message"].as<size_t>();
+    } catch (std::exception& ex) {
+        std::cerr << "Unable to interpret message length: " << ex.what() << std::endl;
+        std::cerr << "Consider using https://users.ece.cmu.edu/~koopman/crc/crc32.html to select parameters." << std::endl;
+        return EXIT_SUCCESS;
+    }
+
+    size_t error_bits;
+    try {
+        error_bits = result["errors"].as<size_t>();
+    } catch (std::exception& ex) {
+        std::cerr << "Unable to interpret error count: " << ex.what() << std::endl;
+        std::cerr << "Consider using https://users.ece.cmu.edu/~koopman/crc/crc32.html to select parameters." << std::endl;
+        return EXIT_SUCCESS;
+    }
+
+    /********************************** CUDA KERNEL **********************************/ 
 
     // Check that there is an available CUDA device
     {
