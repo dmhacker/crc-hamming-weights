@@ -17,7 +17,7 @@ CRC polynomial **p**. A Hamming weight of 0 would indicate
 that a CRC polynomial is able to detect every **k**-bit
 error combination in a message of size **m**.
 
-![Hamming Weight Table](https://i.stack.imgur.com/voOrN.png)
+<p align="center"><img src="https://i.stack.imgur.com/voOrN.png" width="400" height="266"/></p>
 
 A Hamming distance of a CRC polynomial is defined as a stronger
 metric that incorporates Hamming weights; a polynomial with
