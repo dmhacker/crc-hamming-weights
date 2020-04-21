@@ -32,9 +32,9 @@ combination has to be checked. The number of combinations
 per Hamming weight grows roughly exponentially with respect
 to **k**.
 
-That being said, all hope is not lost. Actually checking 
+That being said, actually checking 
 every combination is an easy parallelizable task and
-the CRC validation is inexpensive. Therefore, it would
+CRC computation is inexpensive. Therefore, it would
 make sense that a GPU would be calculate Hamming weights
 quickly, owing to its large number of cores. This project
 is an attempt to implement calculation of Hamming
