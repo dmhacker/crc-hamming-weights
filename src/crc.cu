@@ -35,13 +35,20 @@ __device__ __host__
 uint64_t NaiveCRC::compute(const uint8_t* bytes, size_t bytelen) const {
     // NOTE: this is essentially a replication of a shift register
     uint64_t shiftr = 0;
-    const size_t bitlen = bytelen * 8;
-    for (size_t idx = 0; idx < bitlen + d_polylen; idx++) {
-        auto bit = (idx < bitlen) ? 
-            ((bytes[idx / 8] >> (7 - (idx % 8))) & 1) : 0;
+    for (size_t idx1 = 0; idx1 < bytelen; idx1++) {
+        auto byte = bytes[idx1];
+        for (int idx2 = 7; idx2 >= 0; idx2--) {
+            auto bit = (byte >> idx2) & 1;
+            auto msb = (shiftr >> (d_polylen - 1)) & 1;
+            shiftr <<= 1;
+            shiftr |= bit;
+            shiftr ^= msb ? d_generator : 0;
+        }
+    }
+    // The message is right-padded with {polylen} zeroes
+    for (size_t idx1 = 0; idx1 < d_polylen; idx1++) {
         auto msb = (shiftr >> (d_polylen - 1)) & 1;
         shiftr <<= 1; 
-        shiftr |= bit;
         shiftr ^= msb ? d_generator : 0;
     }
     const uint64_t keepmask = d_polylen == 64 ? ~0ULL 
