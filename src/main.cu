@@ -23,7 +23,8 @@ int main(int argc, char** argv)
     try {
         polynomial = result["poly"].as<uint64_t>();
     } catch (std::exception& ex) {
-        std::cerr << "Unable to interpret polynomial: " << ex.what() << std::endl;
+        std::cerr << "Unable to interpret polynomial: " 
+            << ex.what() << std::endl;
         std::cerr << "Consider using https://users.ece.cmu.edu/~koopman/crc/crc32.html to select parameters." << std::endl;
         return EXIT_SUCCESS;
     }
@@ -32,7 +33,8 @@ int main(int argc, char** argv)
     try {
         message_bits = result["message"].as<size_t>();
     } catch (std::exception& ex) {
-        std::cerr << "Unable to interpret message length: " << ex.what() << std::endl;
+        std::cerr << "Unable to interpret message length: " 
+            << ex.what() << std::endl;
         std::cerr << "Consider using https://users.ece.cmu.edu/~koopman/crc/crc32.html to select parameters." << std::endl;
         return EXIT_SUCCESS;
     }
@@ -41,10 +43,17 @@ int main(int argc, char** argv)
     try {
         error_bits = result["errors"].as<size_t>();
     } catch (std::exception& ex) {
-        std::cerr << "Unable to interpret error count: " << ex.what() << std::endl;
+        std::cerr << "Unable to interpret error count: " 
+            << ex.what() << std::endl;
         std::cerr << "Consider using https://users.ece.cmu.edu/~koopman/crc/crc32.html to select parameters." << std::endl;
         return EXIT_SUCCESS;
     }
+
+    crcham::NaiveCRC ncrc(polynomial);
+    uint64_t evaluations = 
+        crcham::ncrll(message_bits + ncrc.length(), error_bits);
+    std::cout << "Evaluating " << evaluations << " "
+        << error_bits << "-bit error combinations." << std::endl;
 
     /********************************** CUDA KERNEL **********************************/ 
 
@@ -53,7 +62,8 @@ int main(int argc, char** argv)
         int devcnt = 0;
         cudaGetDeviceCount(&devcnt);
         if (devcnt == 0) {
-            std::cerr << "A supported NVIDIA GPU could not be found." << std::endl;
+            std::cerr << "A supported NVIDIA GPU could not be found." 
+                << std::endl;
             return EXIT_FAILURE;
         }
     }
@@ -71,7 +81,8 @@ int main(int argc, char** argv)
     size_t original_heap;
     size_t required_heap = 2 * grid_size * block_size * (message_bits / 8);
     cudaDeviceGetLimit(&original_heap, cudaLimitMallocHeapSize);
-    cudaDeviceSetLimit(cudaLimitMallocHeapSize, std::max(original_heap, required_heap));
+    cudaDeviceSetLimit(cudaLimitMallocHeapSize, 
+            std::max(original_heap, required_heap));
 
     // Allocate memory for thread-local weights
     size_t* weights;
@@ -79,22 +90,38 @@ int main(int argc, char** argv)
     cudaMemset(weights, 0, grid_size * block_size * sizeof(size_t));
 
     // Run the kernel and block until it is done
-    crcham::NaiveCRC ncrc(polynomial);
+    cudaEvent_t start_event; 
+    cudaEvent_t stop_event;
+    cudaEventCreate(&start_event);
+    cudaEventCreate(&stop_event);
+    cudaEventRecord(start_event);
     if (ncrc.length() < 8) {
-        crcham::hammingWeight<crcham::NaiveCRC><<<grid_size, block_size>>>(weights, ncrc, message_bits, error_bits); 
+        crcham::hammingWeight<crcham::NaiveCRC><<<grid_size, block_size>>>(
+                weights, ncrc, message_bits, error_bits); 
     }
     else {
         crcham::TabularCRC tcrc(polynomial);
-        crcham::hammingWeight<crcham::TabularCRC><<<grid_size, block_size>>>(weights, tcrc, message_bits, error_bits); 
+        crcham::hammingWeight<crcham::TabularCRC><<<grid_size, block_size>>>(
+                weights, tcrc, message_bits, error_bits); 
     }
-    cudaDeviceSynchronize();
+    cudaEventRecord(stop_event);
+    cudaEventSynchronize(stop_event);
 
+    // Print out timing information
+    float elapsed_time = 0;
+    cudaEventElapsedTime(&elapsed_time, start_event, stop_event);
+    elapsed_time /= 1000;
+    std::cerr << "Completed in " << elapsed_time
+        << " seconds (" << (evaluations / elapsed_time) 
+        << "/s)." << std::endl;
+    
     // Accumulate results from all threads
     size_t weight = 0;
     for (size_t i = 0; i < grid_size * block_size; i++) {
         weight += weights[i];
     }
-    std::cout << "Hamming Weight = " << weight << std::endl;
+    cudaFree(weights);
+    std::cout << "Hamming weight is " << weight << "." << std::endl;
 
     return EXIT_SUCCESS;
 }

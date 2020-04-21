@@ -70,5 +70,4 @@ fit within a 64-bit unsigned integer. That is:
 ```
 
 This is simply because combination indices are calculated using
-64-bit integers. In the future, I would like to move to 128-bit
-integers which would bump up this limit even more.
+64-bit integers.
