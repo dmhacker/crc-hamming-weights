@@ -36,7 +36,7 @@ That being said, all hope is not lost. Actually checking
 every combination is an easy parallelizable task and
 the CRC validation is inexpensive. Therefore, it would
 make sense that a GPU would be calculate Hamming weights
-quickly, owing to its large number of threads. This project
+quickly, owing to its large number of cores. This project
 is an attempt to implement calculation of Hamming
 weights using NVIDIA GPUs via CUDA.
 
