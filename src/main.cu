@@ -111,7 +111,7 @@ int main(int argc, char** argv)
     float elapsed_time = 0;
     cudaEventElapsedTime(&elapsed_time, start_event, stop_event);
     elapsed_time /= 1000;
-    std::cerr << "Completed in " << elapsed_time
+    std::cout << "Completed in " << elapsed_time
         << " seconds (" << (evaluations / elapsed_time) 
         << "/s)." << std::endl;
     
