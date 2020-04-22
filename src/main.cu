@@ -7,14 +7,21 @@
 
 int main(int argc, char** argv)
 {
-    cxxopts::Options options("crcham", "Calculate the hamming weights of CRC polynomials");
-    options.add_options()("p,poly", "CRC in Koopman notation (implicit +1)", cxxopts::value<uint64_t>());
-    options.add_options()("m,message", "Message length in bits", cxxopts::value<size_t>());
-    options.add_options()("e,errors", "Number of bit errors in the message", cxxopts::value<size_t>());
-    options.add_options()("h,help", "Print help message");
+    cxxopts::Options options("weights", "Calculate the hamming weights of CRC polynomials");
+    options.add_options()("poly", 
+        "CRC in Koopman notation (implicit +1)", cxxopts::value<uint64_t>());
+    options.add_options()("message", 
+        "Message length in bits", cxxopts::value<size_t>());
+    options.add_options()("errors", 
+        "Number of bit errors in the message", cxxopts::value<size_t>());
+    options.add_options()("h,help", 
+        "Print help message");
+    options.parse_positional({"poly", "message", "errors"});
     auto result = options.parse(argc, argv);
     
     if (result.count("help") > 0) {
+        options.positional_help("[poly] [message] [errors]")
+            .show_positional_help();
         std::cout << options.help();
         return EXIT_SUCCESS;
     }
