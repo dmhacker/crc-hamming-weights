@@ -1,7 +1,7 @@
 #include <crcham/crc.hpp>
 
 #include <cassert>
-#include <stdio.h>
+#include <cstdio>
 
 namespace crcham {
 

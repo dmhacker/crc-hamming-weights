@@ -1,8 +1,9 @@
-#include <iostream>
+#include <cassert>
+#include <stdexcept>
 
-#include <crcham/compute.hpp>
 #include <crcham/codeword.hpp>
 #include <crcham/crc.hpp>
+#include <crcham/evaluator.hpp>
 #include <crcham/math.hpp>
 
 namespace crcham {
@@ -11,7 +12,7 @@ namespace {
 
 template <class CRC>
 __global__
-void hammingWeightKernel(size_t* weights, CRC crc, size_t message_bits, size_t error_bits) {
+void weightsKernel(size_t* weights, CRC crc, size_t message_bits, size_t error_bits) {
     // Allocate the minimum number of integers required to hold the message and FCS field
     size_t codeword_bits = message_bits + crc.length();
     size_t codeword_bytes = codeword_bits / 8;
@@ -45,7 +46,17 @@ void hammingWeightKernel(size_t* weights, CRC crc, size_t message_bits, size_t e
 
 }
 
-size_t hammingWeightGPU(float* timing, uint64_t polynomial, size_t message_bits, size_t error_bits) 
+WeightsEvaluator::WeightsEvaluator(uint64_t polynomial, size_t message_bits, size_t error_bits) 
+    : d_polynomial(polynomial)
+    , d_polylen(crcham::NaiveCRC(polynomial).length())
+    , d_message(message_bits)
+    , d_errors(error_bits)
+    , d_evaluations(crcham::ncrll(message_bits + d_polylen, error_bits))
+{
+}
+
+template<>
+void WeightsEvaluator::run<true>()
 {
     // Check that there is an available CUDA device
     {
@@ -63,11 +74,11 @@ size_t hammingWeightGPU(float* timing, uint64_t polynomial, size_t message_bits,
     int grid_size;
     int block_size;
     cudaOccupancyMaxPotentialBlockSize(&grid_size, &block_size, 
-        crcham::hammingWeightKernel<crcham::TabularCRC>);
+        crcham::weightsKernel<crcham::TabularCRC>);
 
     // Set maximum allowable memory sizes
     size_t original_heap;
-    size_t required_heap = 2 * grid_size * block_size * (message_bits / 8);
+    size_t required_heap = 2 * grid_size * block_size * (d_message / 8);
     cudaDeviceGetLimit(&original_heap, cudaLimitMallocHeapSize);
     cudaDeviceSetLimit(cudaLimitMallocHeapSize, 
             std::max(original_heap, required_heap));
@@ -83,34 +94,46 @@ size_t hammingWeightGPU(float* timing, uint64_t polynomial, size_t message_bits,
     cudaEventCreate(&start_event);
     cudaEventCreate(&stop_event);
     cudaEventRecord(start_event);
-    size_t polylen = crcham::NaiveCRC(polynomial).length();
-    if (polylen < 8) {
-        crcham::NaiveCRC ncrc(polynomial);
-        crcham::hammingWeightKernel<crcham::NaiveCRC><<<grid_size, block_size>>>(
-                weights, ncrc, message_bits, error_bits); 
+    if (d_polylen < 8) {
+        crcham::NaiveCRC ncrc(d_polynomial);
+        crcham::weightsKernel<crcham::NaiveCRC><<<grid_size, block_size>>>(
+                weights, ncrc, d_message, d_errors); 
     }
     else {
-        crcham::TabularCRC tcrc(polynomial);
-        crcham::hammingWeightKernel<crcham::TabularCRC><<<grid_size, block_size>>>(
-                weights, tcrc, message_bits, error_bits); 
+        crcham::TabularCRC tcrc(d_polynomial);
+        crcham::weightsKernel<crcham::TabularCRC><<<grid_size, block_size>>>(
+                weights, tcrc, d_message, d_errors); 
     }
     cudaEventRecord(stop_event);
     cudaEventSynchronize(stop_event);
-    cudaEventElapsedTime(timing, start_event, stop_event);
+    float millis = 0;
+    cudaEventElapsedTime(&millis, start_event, stop_event);
+    d_elapsed = std::chrono::milliseconds((unsigned long) millis);
 
     // Accumulate results from all threads
-    size_t weight = 0;
+    d_weight = 0;
     for (size_t i = 0; i < grid_size * block_size; i++) {
-        weight += weights[i];
+        d_weight += weights[i];
     }
     cudaFree(weights);
-
-    return weight;
 }
 
-size_t hammingWeightCPU(float* timing, uint64_t polynomial, size_t message_bits, size_t error_bits) 
+template<>
+void WeightsEvaluator::run<false>()
 {
     throw std::runtime_error("Unimplemented.");
+}
+
+size_t WeightsEvaluator::evaluations() const {
+    return d_evaluations;
+}
+
+size_t WeightsEvaluator::weight() const {
+    return d_weight;
+}
+
+std::chrono::milliseconds WeightsEvaluator::elapsed() const {
+    return d_elapsed;
 }
 
 }

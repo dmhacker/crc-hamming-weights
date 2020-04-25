@@ -1,7 +1,7 @@
 #include <cassert>
 #include <iostream>
 
-#include <crcham/compute.hpp>
+#include <crcham/evaluator.hpp>
 #include <crcham/math.hpp>
 
 #include <cxxopts.hpp>
@@ -57,18 +57,16 @@ int main(int argc, char** argv)
         return EXIT_SUCCESS;
     }
 
-    size_t polylen = crcham::NaiveCRC(polynomial).length();
-    uint64_t evaluations = crcham::ncrll(message_bits + polylen, error_bits);
-    std::cout << "Evaluating " << evaluations << " "
+    crcham::WeightsEvaluator evaluator(polynomial, message_bits, error_bits);
+    std::cout << "Evaluating " << evaluator.evaluations() << " "
               << error_bits << "-bit error combinations." << std::endl;
 
-    float elapsed_time = 0;
-    size_t weight = crcham::hammingWeightGPU(&elapsed_time, polynomial, message_bits, error_bits);
-    elapsed_time /= 1000;
-    std::cout << "Completed in " << elapsed_time
-              << " seconds (" << (evaluations / elapsed_time)
+    evaluator.run<true>();
+    float elapsed_seconds = evaluator.elapsed().count() / 1000.f;
+    std::cout << "Completed in " << elapsed_seconds
+              << " seconds (" << (evaluator.evaluations() / elapsed_seconds)
               << "/s)." << std::endl;
-    std::cout << "Hamming weight is " << weight << "." << std::endl;
+    std::cout << "Hamming weight is " << evaluator.weight() << "." << std::endl;
 
     return EXIT_SUCCESS;
 }
