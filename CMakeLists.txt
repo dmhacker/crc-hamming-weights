@@ -7,6 +7,9 @@ set(CUDA_SEPARABLE_COMPILATION ON)
 include(CTest)
 include(cmake/Catch.cmake)
 find_package(CUDA 8.0)
+find_package(OpenMP)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 
 file(GLOB_RECURSE lib_sources
     "${CMAKE_SOURCE_DIR}/src/*.cpp"

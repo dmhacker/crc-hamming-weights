@@ -1,10 +1,11 @@
-#include <cassert>
 #include <stdexcept>
 
 #include <crcham/codeword.hpp>
 #include <crcham/crc.hpp>
 #include <crcham/evaluator.hpp>
 #include <crcham/math.hpp>
+
+#include <omp.h>
 
 namespace crcham {
 
@@ -13,13 +14,12 @@ namespace {
 template <class CRC>
 __global__
 void weightsKernel(size_t* weights, CRC crc, size_t message_bits, size_t error_bits) {
-    // Allocate the minimum number of integers required to hold the message and FCS field
     size_t codeword_bits = message_bits + crc.length();
     size_t codeword_bytes = codeword_bits / 8;
     if (codeword_bits % 8 != 0) {
         codeword_bytes++;
     }
-    auto codeword_byte_ptr = static_cast<uint8_t*>(
+    auto codeword = static_cast<uint8_t*>(
         malloc(codeword_bytes * sizeof(uint8_t)));
 
     const size_t widx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -29,19 +29,50 @@ void weightsKernel(size_t* weights, CRC crc, size_t message_bits, size_t error_b
     size_t weight = 0;
 
     for (; pidx < pmax; pidx += pincr) {
-        // Permute the bytes in the ${pidx}th way
-        permute(codeword_byte_ptr, codeword_bytes, pidx, codeword_bits, error_bits);
-        assert(popcount(codeword_byte_ptr, codeword_bytes) == error_bits); 
-        // Test to see if the codeword with errors is considered valid
-        uint64_t error_crc = extract(codeword_byte_ptr, codeword_bytes, codeword_bits, crc.length());
-        uint64_t good_crc = crc.compute(codeword_byte_ptr, codeword_bytes);
+        permute(codeword, codeword_bytes, pidx, codeword_bits, error_bits);
+        uint64_t error_crc = extract(codeword, codeword_bytes, codeword_bits, crc.length());
+        uint64_t good_crc = crc.compute(codeword, codeword_bytes);
         if (error_crc == good_crc) {
             weight++;
         }
     }
     weights[widx] = weight;
 
-    free(codeword_byte_ptr);
+    free(codeword);
+}
+
+template <class CRC>
+size_t weightsOpenMP(const CRC& crc, size_t message_bits, size_t error_bits) 
+{
+    constexpr int NUM_THREADS = 8;
+
+    size_t codeword_bits = message_bits + crc.length();
+    size_t codeword_bytes = codeword_bits / 8;
+    if (codeword_bits % 8 != 0) {
+        codeword_bytes++;
+    }
+
+    auto codewords = new uint8_t[NUM_THREADS * codeword_bytes]();
+    size_t weights[NUM_THREADS] = {0};
+    uint64_t pmax = ncrll(codeword_bits, error_bits);
+
+    #pragma omp parallel for num_threads(NUM_THREADS)
+    for (uint64_t pidx = 0; pidx < pmax; pidx++) {
+        auto codeword = codewords + codeword_bytes * omp_get_thread_num();
+        permute(codeword, codeword_bytes, pidx, codeword_bits, error_bits);
+        uint64_t error_crc = extract(codeword, codeword_bytes, codeword_bits, crc.length());
+        uint64_t good_crc = crc.compute(codeword, codeword_bytes);
+        if (error_crc == good_crc) {
+            weights[omp_get_thread_num()]++;
+        }
+    }
+
+    delete[] codewords;
+    size_t weight = 0;
+    for (size_t i = 0; i < NUM_THREADS; i++) {
+        weight += weights[i];
+    }
+    return weight;
 }
 
 }
@@ -121,7 +152,17 @@ void WeightsEvaluator::run<true>()
 template<>
 void WeightsEvaluator::run<false>()
 {
-    throw std::runtime_error("Unimplemented.");
+    auto timestamp = std::chrono::steady_clock::now();
+    if (d_polylen < 8) {
+        crcham::NaiveCRC ncrc(d_polynomial);
+        d_weight = weightsOpenMP(ncrc, d_message, d_errors);
+    }
+    else {
+        crcham::TabularCRC tcrc(d_polynomial);
+        d_weight = weightsOpenMP(tcrc, d_message, d_errors);
+    }
+    d_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::steady_clock::now() - timestamp);
 }
 
 size_t WeightsEvaluator::evaluations() const {

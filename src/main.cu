@@ -15,6 +15,8 @@ int main(int argc, char** argv)
         "Message length in bits", cxxopts::value<size_t>());
     options.add_options()("errors",
         "Number of bit errors in the message", cxxopts::value<size_t>());
+    options.add_options()("c,cpu",
+        "Run without using a GPU", cxxopts::value<bool>()->default_value("false"));
     options.add_options()("h,help",
         "Print help message");
     options.parse_positional({ "poly", "message", "errors" });
@@ -61,7 +63,13 @@ int main(int argc, char** argv)
     std::cout << "Evaluating " << evaluator.evaluations() << " "
               << error_bits << "-bit error combinations." << std::endl;
 
-    evaluator.run<true>();
+    if (result["cpu"].as<bool>()) {
+        evaluator.run<false>();
+    }
+    else {
+        evaluator.run<true>();
+    }
+
     float elapsed_seconds = evaluator.elapsed().count() / 1000.f;
     std::cout << "Completed in " << elapsed_seconds
               << " seconds (" << (evaluator.evaluations() / elapsed_seconds)

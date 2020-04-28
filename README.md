@@ -1,7 +1,7 @@
 # crc-hamming-distance
 
 Independent verification of Hamming weights for various CRC polynomials
-using CUDA.
+either via CUDA or OpenMP.
 
 [Koopman et al.](http://users.ece.cmu.edu/~koopman/roses/dsn04/koopman04_crc_poly_embedded.pdf) 
 define a Hamming weight with respect to a CRC polynomial as being a
@@ -38,18 +38,20 @@ CRC computation is inexpensive. Therefore, it would
 make sense that a GPU would be calculate Hamming weights
 quickly, owing to its large number of cores. This project
 is an attempt to implement calculation of Hamming
-weights using NVIDIA GPUs via CUDA.
+weights using NVIDIA GPUs via CUDA. There is also an option
+to perform the same computation on your CPU via OpenMP,
+mostly for benchmarking or testing purposes.
 
 ## Usage
 
 Perform an out-of-source CMake build. You must have CUDA
-installed. CUDA itself will only work with NVIDIA GPUs.
+and OpenMP installed. CUDA itself will only work with NVIDIA GPUs.
 
 ```
 mkdir build
 cd build
 cmake ..
-make -j8
+make
 ```
 
 # Restrictions
