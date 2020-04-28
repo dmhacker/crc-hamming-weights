@@ -1,4 +1,5 @@
 #include <stdexcept>
+#include <thread>
 
 #include <crcham/codeword.hpp>
 #include <crcham/crc.hpp>
@@ -44,19 +45,18 @@ void weightsKernel(size_t* weights, CRC crc, size_t message_bits, size_t error_b
 template <class CRC>
 size_t weightsOpenMP(const CRC& crc, size_t message_bits, size_t error_bits) 
 {
-    constexpr int NUM_THREADS = 8;
-
     size_t codeword_bits = message_bits + crc.length();
     size_t codeword_bytes = codeword_bits / 8;
     if (codeword_bits % 8 != 0) {
         codeword_bytes++;
     }
 
-    auto codewords = new uint8_t[NUM_THREADS * codeword_bytes]();
-    size_t weights[NUM_THREADS] = {0};
+    auto num_threads = std::max(3u, std::thread::hardware_concurrency()) - 2;
+    auto codewords = new uint8_t[num_threads * codeword_bytes]();
+    auto weights = new size_t[num_threads]();
     uint64_t pmax = ncrll(codeword_bits, error_bits);
 
-    #pragma omp parallel for num_threads(NUM_THREADS)
+    #pragma omp parallel for num_threads(num_threads)
     for (uint64_t pidx = 0; pidx < pmax; pidx++) {
         auto codeword = codewords + codeword_bytes * omp_get_thread_num();
         permute(codeword, codeword_bytes, pidx, codeword_bits, error_bits);
@@ -69,7 +69,7 @@ size_t weightsOpenMP(const CRC& crc, size_t message_bits, size_t error_bits)
 
     delete[] codewords;
     size_t weight = 0;
-    for (size_t i = 0; i < NUM_THREADS; i++) {
+    for (size_t i = 0; i < num_threads; i++) {
         weight += weights[i];
     }
     return weight;
