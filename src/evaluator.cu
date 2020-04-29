@@ -51,7 +51,7 @@ size_t weightsOpenMP(const CRC& crc, size_t message_bits, size_t error_bits)
         codeword_bytes++;
     }
 
-    auto num_threads = std::max(2u, std::thread::hardware_concurrency()) - 1;
+    auto num_threads = std::max(3u, std::thread::hardware_concurrency()) - 2;
     auto codewords = new uint8_t[num_threads * codeword_bytes]();
     auto weights = new size_t[num_threads]();
     uint64_t pmax = ncrll(codeword_bits, error_bits);
