@@ -1,4 +1,4 @@
-# crc-hamming-distance
+# crc-hamming-weights
 
 Independent verification of Hamming weights for various CRC polynomials
 either via CUDA or OpenMP.
